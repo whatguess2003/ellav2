@@ -48,8 +48,11 @@ connections: Dict[str, WebSocket] = {}
 class TokenRequest(BaseModel):
     session_id: Optional[str] = None
 
-def get_guest_id():
-    return f"guest_{str(uuid.uuid4())[:8]}"
+def get_guest_id(phone_number=None):
+    """Generate guest ID with cross-platform support"""
+    if phone_number:
+        return phone_number
+    return f"guest_voice_{str(uuid.uuid4())[:8]}"
 
 @app.get("/voice/health")
 async def health():
@@ -97,8 +100,11 @@ FUNCTIONS = {
 }
 
 @app.websocket("/voice/realtime_hotel")
-async def realtime_hotel(websocket: WebSocket, guest_id: str = None):
-    if not guest_id:
+async def realtime_hotel(websocket: WebSocket, guest_id: str = None, phone_number: str = None):
+    # Use phone number for cross-platform context sharing if provided
+    if phone_number:
+        guest_id = phone_number
+    elif not guest_id:
         guest_id = get_guest_id()
     
     await websocket.accept()
@@ -106,6 +112,10 @@ async def realtime_hotel(websocket: WebSocket, guest_id: str = None):
     connections[connection_id] = websocket
     
     logger.info(f"[VOICE] Guest {guest_id} connected")
+    
+    # Log cross-platform context sharing
+    if phone_number:
+        logger.info(f"[VOICE] Cross-platform context enabled for phone: {phone_number}")
     
     try:
         async with openai_client.beta.realtime.connect(model=VOICE_MODEL) as connection:

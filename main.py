@@ -30,14 +30,12 @@ from datetime import datetime
 
 # WhatsApp Business API integration
 try:
-    from whatsapp_business_api import WhatsAppBusinessAPI
+    from hotel_assistant.whatsapp_media_agent import handle_whatsapp_webhook as handle_media_webhook
     WHATSAPP_INTEGRATION_AVAILABLE = True
-    whatsapp_api = WhatsAppBusinessAPI()
     print("✅ WhatsApp Business API integration loaded")
 except ImportError as e:
     print(f"⚠️ WhatsApp Business API not available: {e}")
     WHATSAPP_INTEGRATION_AVAILABLE = False
-    whatsapp_api = None
 
 # Initialize FastAPI app
 app = FastAPI(title="ELLA Hotel Assistant", version="1.0.0")
@@ -387,6 +385,7 @@ async def test_whatsapp_configuration():
         "message": "WhatsApp configuration complete" if all_configured else "WhatsApp configuration incomplete",
         "configuration": config_status,
         "webhook_url": "https://web-production-2a2c9.up.railway.app/webhook",
+        "phone_number_id_from_webhook": "690397460822060",
         "instructions": {
             "missing_variables": "Add these to Railway Dashboard → Variables:",
             "required": [
@@ -396,6 +395,58 @@ async def test_whatsapp_configuration():
             ]
         } if not all_configured else None
     }
+
+@app.get("/test/whatsapp-token")
+async def test_whatsapp_token():
+    """Test WhatsApp access token validity"""
+    import os
+    import httpx
+    
+    access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
+    phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+    
+    if not access_token or not phone_number_id:
+        return {
+            "status": "error",
+            "message": "Missing access token or phone number ID"
+        }
+    
+    try:
+        # Test token by getting phone number info
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://graph.facebook.com/v22.0/{phone_number_id}",
+                headers={"Authorization": f"Bearer {access_token}"},
+                timeout=10.0
+            )
+            
+            if response.status_code == 200:
+                phone_info = response.json()
+                return {
+                    "status": "success",
+                    "message": "Access token is valid",
+                    "phone_info": phone_info,
+                    "token_permissions": "✅ Valid for this phone number"
+                }
+            elif response.status_code == 401:
+                return {
+                    "status": "error",
+                    "message": "Access token is invalid or expired",
+                    "error_code": 401,
+                    "solution": "Generate a new access token in Facebook Developer Console"
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": f"API error: {response.status_code}",
+                    "response": response.text[:200]
+                }
+                
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Token test failed: {str(e)}"
+        }
 
 # 📱 WHATSAPP BUSINESS API WEBHOOK ENDPOINTS
 
@@ -425,33 +476,97 @@ async def verify_whatsapp_webhook(request: Request):
 async def whatsapp_webhook(request: Request):
     """WhatsApp Business API webhook endpoint"""
     try:
-        # Log all incoming requests for debugging
-        print(f"🔍 WEBHOOK DEBUG: Received request from {request.client.host if request.client else 'unknown'}")
-        print(f"🔍 WEBHOOK DEBUG: Headers: {dict(request.headers)}")
-        print(f"🔍 WEBHOOK DEBUG: Method: {request.method}")
-        
         webhook_data = await request.json()
         
         if not webhook_data:
-            print("❌ WEBHOOK DEBUG: No JSON data received")
             raise HTTPException(status_code=400, detail="No JSON data")
         
-        print("📱 WhatsApp webhook received:")
-        print(f"📱 Data: {webhook_data}")
+        # Process WhatsApp webhook data
+        if webhook_data.get("object") == "whatsapp_business_account":
+            for entry in webhook_data.get("entry", []):
+                for change in entry.get("changes", []):
+                    value = change.get("value", {})
+                    
+                    # Handle incoming messages
+                    if "messages" in value:
+                        for message in value["messages"]:
+                            phone_number = message.get("from")
+                            message_type = message.get("type")
+                            message_id = message.get("id")
+                            
+                            print(f"📨 Processing WhatsApp message from {phone_number}, type: {message_type}")
+                            
+                            # Route based on message type
+                            if message_type == "text":
+                                # Route text messages to ELLA chat agent
+                                text_body = message.get("text", {}).get("body", "")
+                                # Use phone number directly as guest_id for cross-platform context sharing
+                                guest_id = phone_number
+                                
+                                try:
+                                    # Process through ELLA chat agent
+                                    result = ella_agent.handle_message(text_body, guest_id)
+                                    response_message = result["message"]
+                                    
+                                    # Send response back to WhatsApp
+                                    await send_whatsapp_message(phone_number, response_message)
+                                    print(f"✅ ELLA responded to {phone_number}: {response_message[:50]}...")
+                                    
+                                except Exception as e:
+                                    print(f"❌ Failed to process text message: {e}")
+                                    # Send error message to user
+                                    await send_whatsapp_message(phone_number, "Maaf, ada masalah dengan sistem. Cuba lagi nanti.")
+                            
+                            elif message_type in ["image", "video", "document"]:
+                                # Route media messages to media agent
+                                if WHATSAPP_INTEGRATION_AVAILABLE:
+                                    try:
+                                        result = await handle_media_webhook(webhook_data)
+                                        print(f"📸 Media processed: {result}")
+                                    except Exception as e:
+                                        print(f"❌ Failed to process media: {e}")
+                    
+                    # Handle message status updates (delivered, read, etc.)
+                    elif "statuses" in value:
+                        for status in value["statuses"]:
+                            message_id = status.get("id")
+                            status_type = status.get("status")
+                            print(f"📊 Message {message_id} status: {status_type}")
         
-        # For now, just acknowledge the webhook
-        # TODO: Process webhook through WhatsApp API handler when integration is ready
-        if WHATSAPP_INTEGRATION_AVAILABLE and whatsapp_api:
-            result = await whatsapp_api.process_webhook(webhook_data)
-            return {"status": "ok", "result": result}
-        else:
-            print("📱 WhatsApp integration not available, acknowledging webhook")
-            return {"status": "ok", "message": "Webhook received"}
+        return {"status": "success"}
         
     except Exception as e:
         print(f"❌ WhatsApp webhook error: {e}")
-        print(f"🔍 WEBHOOK DEBUG: Exception details: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+async def send_whatsapp_message(phone_number: str, message: str):
+    """Send message back to WhatsApp user"""
+    import os
+    import httpx
+    
+    access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
+    phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+    
+    if not access_token or not phone_number_id:
+        raise Exception("WhatsApp credentials not configured")
+    
+    url = f"https://graph.facebook.com/v22.0/{phone_number_id}/messages"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": phone_number,
+        "type": "text",
+        "text": {"body": message}
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload, headers=headers, timeout=10.0)
+        response.raise_for_status()
+        return response.json()
 
 @app.get("/test/webhook-debug")
 async def test_webhook_debug():
@@ -492,7 +607,7 @@ async def test_whatsapp_message(request: dict):
         print(f"📱 TEST: Simulating WhatsApp message from {phone}: {message}")
         
         # Process message through ELLA
-        guest_id = f"whatsapp_{phone}"
+        guest_id = phone  # Use phone number directly for cross-platform context sharing
         result = ella_agent.handle_message(message, guest_id)
         
         print(f"🤖 ELLA Response: {result['message']}")

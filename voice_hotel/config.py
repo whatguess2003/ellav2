@@ -27,9 +27,17 @@ REDIS_CONFIG = {
 }
 
 # Simple guest ID function
-def get_guest_id():
+def get_guest_id(phone_number=None):
+    """
+    Generate guest ID with cross-platform support
+    If phone_number provided, use it for cross-platform context sharing
+    """
+    if phone_number:
+        return phone_number
+    
+    # Fallback for anonymous voice calls
     import uuid
-    return f"guest_{str(uuid.uuid4())[:8]}"
+    return f"guest_voice_{str(uuid.uuid4())[:8]}"
 
 # Hotel search tools for Realtime API (essential functions only)
 REALTIME_VOICE_FUNCTIONS = [
