@@ -6,8 +6,7 @@ Deployed: 2025-06-13 03:55 UTC
 """
 
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Form
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse, FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from chat_assistant import get_chat_agent
@@ -44,19 +43,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files (serves the chat interface)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Mount media_storage directory for file-based media serving
+# Create media directories (if needed)
 media_storage_path = Path("media_storage")
 media_storage_path.mkdir(exist_ok=True)
-app.mount("/media", StaticFiles(directory="media_storage"), name="media_storage")
-
-# Create media directories
-MEDIA_DIR = Path("static/media")
-DEMO_PHOTOS_DIR = Path("static/demo-photos")
-MEDIA_DIR.mkdir(exist_ok=True)
-DEMO_PHOTOS_DIR.mkdir(exist_ok=True)
 
 # Initialize READ-ONLY media tools for ELLA
 try:
@@ -88,13 +77,25 @@ class MessageResponse(BaseModel):
 
 @app.get("/")
 async def root():
-    """Redirect to ELLA chat interface"""
-    return RedirectResponse(url="/static/chat.html")
+    """ELLA API Root endpoint"""
+    return JSONResponse({
+        "message": "ELLA Hotel Assistant API",
+        "version": "1.0.0",
+        "status": "running",
+        "endpoints": {
+            "health": "/health",
+            "message": "/message",
+            "webhook": "/webhook"
+        }
+    })
 
 @app.get("/guest")
 async def guest_interface():
-    """Guest-specific interface"""
-    return FileResponse("static/chat.html")
+    """Guest API endpoint"""
+    return JSONResponse({
+        "message": "ELLA Guest API",
+        "status": "available"
+    })
 
 @app.post("/message", response_model=MessageResponse)
 async def process_message(request: MessageRequest):
