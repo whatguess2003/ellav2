@@ -1,0 +1,7 @@
+{
+  "backup_name": "initial_setup",
+  "created_at": "2025-06-07T12:30:26.483171",
+  "source_db": "ella.db",
+  "backup_size": 475136,
+  "integrity_verified": true
+}

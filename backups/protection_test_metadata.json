@@ -1,0 +1,7 @@
+{
+  "backup_name": "protection_test",
+  "created_at": "2025-06-07T12:34:49.024801",
+  "source_db": "ella.db",
+  "backup_size": 475136,
+  "integrity_verified": true
+}

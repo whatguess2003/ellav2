@@ -1,0 +1,19 @@
+
+PAYMENT PROOF VERIFICATION REQUEST
+==================================
+
+Proof ID: 1
+Booking Reference: Grand Hyatt Kuala Lumpur_20250615_booking8
+File: Grand Hyatt Kuala Lumpur_20250615_booking8_PaymentProof_20250611_210553.jpg
+Submitted: 2025-06-11 21:05:53
+Status: PENDING VERIFICATION
+
+Please verify this payment proof and update the system accordingly.
+
+Actions Required:
+1. Verify payment authenticity
+2. Confirm payment amount
+3. Update verification status in system
+4. Process payment if valid
+
+File Location: payment_proofs\pending_verification\Grand Hyatt Kuala Lumpur_20250615_booking8_PaymentProof_20250611_210553.jpg

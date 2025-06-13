@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Operations - LEON PMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/shared.css" rel="stylesheet">
+    <style>
+        .operations-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .pending-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pending-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 20px;
+        }
+
+        .pending-item {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .pending-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-color: #FF6842;
+        }
+
+        .guest-info {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .booking-details {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .check-in-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .check-in-btn:hover {
+            background: #218838;
+        }
+
+        .check-out-btn {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .check-out-btn:hover {
+            background: #e0a800;
+        }
+
+        .room-assignment-btn {
+            background: #FF6842;
+            color: white;
+        }
+
+        .room-assignment-btn:hover {
+            background: #e55a3a;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .quick-stat {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+            border-top: 4px solid #FF6842;
+        }
+
+        .quick-stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FF6842;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .quick-stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .recent-actions {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-top: 30px;
+        }
+
+        .action-log-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .action-log-item:last-child {
+            border-bottom: none;
+        }
+
+        .action-text {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .action-time {
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: auto;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            overflow-x: auto;
+            flex: 1;
+            max-height: calc(90vh - 140px);
+        }
+
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 5px;
+            border: 1px solid #f0f0f0;
+            border-radius: 6px;
+        }
+
+        .room-option {
+            padding: 15px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .room-option:hover {
+            border-color: #FF6842;
+            background: #fff5f3;
+        }
+
+        .room-option.selected {
+            border-color: #FF6842;
+            background: #FF6842;
+            color: white;
+        }
+
+        .room-option.unavailable {
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+            border-color: #dee2e6;
+        }
+
+        .room-number {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .room-type {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        /* Custom Scrollbar Styles */
+        .modal-body::-webkit-scrollbar,
+        .room-grid::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track,
+        .room-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb,
+        .room-grid::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover,
+        .room-grid::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .modal-body::-webkit-scrollbar-corner,
+        .room-grid::-webkit-scrollbar-corner {
+            background: #f1f1f1;
+        }
+
+        @media (max-width: 768px) {
+            .operations-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 1% auto;
+                max-height: 95vh;
+            }
+            
+            .modal-body {
+                max-height: calc(95vh - 120px);
+                padding: 15px;
+            }
+            
+            .room-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-hotel"></i> LEON PMS
+            </a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link" data-page="dashboard">
+                            <i class="nav-icon fas fa-home"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="operations.html" class="nav-link" data-page="operations">
+                            <i class="nav-icon fas fa-tasks"></i>
+                            Operations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="inventory.html" class="nav-link" data-page="inventory">
+                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            Inventory
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="bookings.html" class="nav-link" data-page="bookings">
+                            <i class="nav-icon fas fa-book"></i>
+                            Bookings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="rooms.html" class="nav-link" data-page="rooms">
+                            <i class="nav-icon fas fa-bed"></i>
+                            Room Types
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="analytics.html" class="nav-link" data-page="analytics">  
+                            <i class="nav-icon fas fa-chart-bar"></i>
+                            Analytics
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i> Property Manager
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">Daily Operations</h1>
+                <p class="page-subtitle">Manage check-ins, check-outs, and room assignments</p>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="quick-stats" id="quickStats">
+                <div class="quick-stat">
+                    <div class="spinner"></div>
+                    Loading...
+                </div>
+            </div>
+
+            <!-- Operations Grid -->
+            <div class="operations-grid">
+                <!-- Pending Check-ins -->
+                <div class="pending-section">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-sign-in-alt"></i> Pending Check-ins
+                        </h3>
+                    </div>
+                    <div class="pending-list" id="pendingCheckins">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading check-ins...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Check-outs -->
+                <div class="pending-section">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-sign-out-alt"></i> Pending Check-outs
+                        </h3>
+                    </div>
+                    <div class="pending-list" id="pendingCheckouts">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading check-outs...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Actions -->
+            <div class="recent-actions">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Actions</h3>
+                </div>
+                <div id="recentActions">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Loading recent actions...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Room Assignment Modal -->
+    <div id="roomAssignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Assign Room</h3>
+                <button class="close-modal" onclick="closeModal('roomAssignmentModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="assignmentDetails"></div>
+                <div class="form-group">
+                    <label>Select Available Room:</label>
+                    <div class="room-grid" id="availableRooms">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Loading rooms...
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-10 mt-20">
+                    <button class="btn btn-secondary" onclick="closeModal('roomAssignmentModal')">Cancel</button>
+                    <button class="btn btn-primary" id="confirmAssignmentBtn" onclick="confirmRoomAssignment()" disabled>
+                        Assign Room
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-out Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Check-out Guest</h3>
+                <button class="close-modal" onclick="closeModal('checkoutModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="checkoutDetails"></div>
+                <div class="form-group">
+                    <label for="roomStatusAfterCheckout">Room Status After Check-out:</label>
+                    <select id="roomStatusAfterCheckout" class="form-control">
+                        <option value="DIRTY_VACANT">Dirty - Needs Cleaning</option>
+                        <option value="CLEAN_VACANT">Clean - Ready for Next Guest</option>
+                        <option value="OUT_OF_ORDER">Out of Order - Maintenance Required</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-10 mt-20">
+                    <button class="btn btn-secondary" onclick="closeModal('checkoutModal')">Cancel</button>
+                    <button class="btn btn-primary" onclick="confirmCheckout()">
+                        Check-out Guest
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/navigation.js"></script>
+    <script>
+        let currentAssignment = null;
+        let currentCheckout = null;
+        let selectedRoom = null;
+
+        async function loadOperations() {
+            try {
+                await Promise.all([
+                    loadQuickStats(),
+                    loadPendingCheckins(),
+                    loadPendingCheckouts(),
+                    loadRecentActions()
+                ]);
+            } catch (error) {
+                console.error('Error loading operations:', error);
+                showAlert('Failed to load operations data', 'error');
+            }
+        }
+
+        async function loadQuickStats() {
+            try {
+                const stats = await api.getDashboardStats();
+                renderQuickStats(stats);
+            } catch (error) {
+                console.error('Error loading quick stats:', error);
+            }
+        }
+
+        function renderQuickStats(stats) {
+            const quickStatsContainer = document.getElementById('quickStats');
+            
+            const quickStats = [
+                {
+                    label: 'Check-ins Today',
+                    value: stats.analytics?.daily?.todays_checkins || 0,
+                    icon: 'fa-sign-in-alt'
+                },
+                {
+                    label: 'Check-outs Today',
+                    value: stats.analytics?.daily?.todays_checkouts || 0,
+                    icon: 'fa-sign-out-alt'
+                },
+                {
+                    label: 'Occupied Rooms',
+                    value: stats.analytics?.rooms?.occupied_rooms || 0,
+                    icon: 'fa-bed'
+                },
+                {
+                    label: 'Available Rooms',
+                    value: stats.analytics?.rooms?.available_rooms || 0,
+                    icon: 'fa-door-open'
+                }
+            ];
+
+            quickStatsContainer.innerHTML = quickStats.map(stat => `
+                <div class="quick-stat">
+                    <span class="quick-stat-number">
+                        <i class="fas ${stat.icon}"></i>
+                        ${stat.value}
+                    </span>
+                    <div class="quick-stat-label">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadPendingCheckins() {
+            try {
+                const bookings = await api.getBookings();
+                const pendingCheckins = bookings.filter(booking => 
+                    booking.status === 'CONFIRMED' && 
+                    new Date(booking.checkin_date) <= new Date()
+                );
+                renderPendingCheckins(pendingCheckins);
+            } catch (error) {
+                console.error('Error loading pending check-ins:', error);
+                document.getElementById('pendingCheckins').innerHTML = `
+                    <div class="alert alert-error">Failed to load check-ins</div>
+                `;
+            }
+        }
+
+        function renderPendingCheckins(checkins) {
+            const container = document.getElementById('pendingCheckins');
+            
+            if (checkins.length === 0) {
+                container.innerHTML = '<div class="text-center" style="padding: 40px; color: #666;">No pending check-ins</div>';
+                return;
+            }
+
+            container.innerHTML = checkins.map(booking => `
+                <div class="pending-item">
+                    <div class="guest-info">${booking.guest_name}</div>
+                    <div class="booking-details">
+                        Booking #${booking.id} | 
+                        ${formatDate(booking.checkin_date)} - ${formatDate(booking.checkout_date)} |
+                        ${booking.nights} nights
+                    </div>
+                    <div class="action-buttons">
+                        ${booking.room_id ? 
+                            `<button class="action-btn check-in-btn" onclick="performCheckin(${booking.id}, ${booking.room_id})">
+                                <i class="fas fa-sign-in-alt"></i> Check-in Room ${booking.room_id}
+                            </button>` :
+                            `<button class="action-btn room-assignment-btn" onclick="openRoomAssignment(${booking.id}, '${booking.guest_name}', '${booking.checkin_date}', '${booking.checkout_date}')">
+                                <i class="fas fa-bed"></i> Assign Room
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadPendingCheckouts() {
+            try {
+                const bookings = await api.getBookings();
+                const pendingCheckouts = bookings.filter(booking => 
+                    booking.status === 'CHECKED_IN' && 
+                    new Date(booking.checkout_date) <= new Date()
+                );
+                renderPendingCheckouts(pendingCheckouts);
+            } catch (error) {
+                console.error('Error loading pending check-outs:', error);
+                document.getElementById('pendingCheckouts').innerHTML = `
+                    <div class="alert alert-error">Failed to load check-outs</div>
+                `;
+            }
+        }
+
+        function renderPendingCheckouts(checkouts) {
+            const container = document.getElementById('pendingCheckouts');
+            
+            if (checkouts.length === 0) {
+                container.innerHTML = '<div class="text-center" style="padding: 40px; color: #666;">No pending check-outs</div>';
+                return;
+            }
+
+            container.innerHTML = checkouts.map(booking => `
+                <div class="pending-item">
+                    <div class="guest-info">${booking.guest_name}</div>
+                    <div class="booking-details">
+                        Room ${booking.room_id} | 
+                        Check-out: ${formatDate(booking.checkout_date)} |
+                        Booking #${booking.id}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn check-out-btn" onclick="openCheckout(${booking.assignment_id}, '${booking.guest_name}', ${booking.room_id})">
+                            <i class="fas fa-sign-out-alt"></i> Check-out
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadRecentActions() {
+            // Mock recent actions data
+            const actions = [
+                { text: 'John Doe checked into Room 1001', time: '2 hours ago' },
+                { text: 'Sarah Chen checked out of Room 1002', time: '4 hours ago' },
+                { text: 'Room 1003 assigned to Mike Johnson', time: '6 hours ago' },
+                { text: 'Emily Davis checked into Room 1005', time: '8 hours ago' }
+            ];
+
+            const container = document.getElementById('recentActions');
+            container.innerHTML = actions.map(action => `
+                <div class="action-log-item">
+                    <div class="action-text">${action.text}</div>
+                    <div class="action-time">${action.time}</div>
+                </div>
+            `).join('');
+        }
+
+        async function openRoomAssignment(bookingId, guestName, checkinDate, checkoutDate) {
+            currentAssignment = { bookingId, guestName, checkinDate, checkoutDate };
+            selectedRoom = null;
+            
+            document.getElementById('assignmentDetails').innerHTML = `
+                <div class="mb-20">
+                    <strong>Guest:</strong> ${guestName}<br>
+                    <strong>Dates:</strong> ${formatDate(checkinDate)} - ${formatDate(checkoutDate)}
+                </div>
+            `;
+
+            try {
+                // For now, just load all available rooms since room_type_id is not in booking data
+                document.getElementById('availableRooms').innerHTML = `
+                    <div class="alert alert-info">Loading available rooms...</div>
+                `;
+                await loadAllAvailableRooms(checkinDate, checkoutDate);
+            } catch (error) {
+                console.error('Error loading available rooms:', error);
+                document.getElementById('availableRooms').innerHTML = `
+                    <div class="alert alert-error">Failed to load available rooms</div>
+                `;
+            }
+
+            document.getElementById('roomAssignmentModal').style.display = 'block';
+        }
+
+        async function loadAllAvailableRooms(checkinDate, checkoutDate) {
+            try {
+                // Get all rooms for the hotel to find available ones
+                const roomsData = await api.getRooms();
+                
+                if (roomsData.success && roomsData.rooms) {
+                    // Filter rooms that are available (CLEAN_VACANT or DIRTY_VACANT)
+                    const availableRooms = roomsData.rooms.filter(room => 
+                        room.room_status === 'CLEAN_VACANT' || room.room_status === 'DIRTY_VACANT'
+                    );
+                    
+                    // Transform the data to match the expected format
+                    const roomsForSelection = availableRooms.map(room => ({
+                        id: room.room_id,
+                        room_number: room.room_number,
+                        room_type: room.room_name || 'Standard',
+                        status: room.room_status
+                    }));
+                    
+                    renderAvailableRooms(roomsForSelection);
+                } else {
+                    document.getElementById('availableRooms').innerHTML = `
+                        <div class="alert alert-error">No room data available</div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading all available rooms:', error);
+                document.getElementById('availableRooms').innerHTML = `
+                    <div class="alert alert-error">Failed to load rooms</div>
+                `;
+            }
+        }
+
+        function renderAvailableRooms(rooms) {
+            const container = document.getElementById('availableRooms');
+            
+            if (!rooms || rooms.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No rooms available for selected dates</div>';
+                return;
+            }
+
+            // Handle different data structures
+            let roomsArray = rooms;
+            if (rooms.success && rooms.available_rooms) {
+                roomsArray = rooms.available_rooms;
+            } else if (rooms.clean_rooms || rooms.dirty_rooms) {
+                roomsArray = [...(rooms.clean_rooms || []), ...(rooms.dirty_rooms || [])];
+            }
+
+            container.innerHTML = roomsArray.map(room => `
+                <div class="room-option" onclick="selectRoom('${room.room_id || room.id}', this)">
+                    <div class="room-number">${room.room_number}</div>
+                    <div class="room-type">${room.room_name || room.room_type || 'Standard'}</div>
+                    ${room.room_status ? `<div class="room-status">${room.room_status}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function selectRoom(roomId, element) {
+            // Remove previous selection
+            document.querySelectorAll('.room-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+
+            // Select current room
+            element.classList.add('selected');
+            selectedRoom = roomId;
+            
+            // Enable confirm button
+            document.getElementById('confirmAssignmentBtn').disabled = false;
+        }
+
+        async function confirmRoomAssignment() {
+            if (!selectedRoom || !currentAssignment) return;
+
+            try {
+                await api.assignRoom(currentAssignment.bookingId, selectedRoom);
+                showAlert('Room assigned successfully!', 'success');
+                closeModal('roomAssignmentModal');
+                loadPendingCheckins(); // Refresh the list
+            } catch (error) {
+                console.error('Error assigning room:', error);
+                showAlert('Failed to assign room', 'error');
+            }
+        }
+
+        async function performCheckin(bookingId, roomId) {
+            try {
+                await api.checkIn(bookingId, roomId);
+                showAlert('Guest checked in successfully!', 'success');
+                loadPendingCheckins(); // Refresh the list
+                loadQuickStats(); // Update stats
+            } catch (error) {
+                console.error('Error checking in guest:', error);
+                showAlert('Failed to check in guest', 'error');
+            }
+        }
+
+        function openCheckout(assignmentId, guestName, roomId) {
+            currentCheckout = { assignmentId, guestName, roomId };
+            
+            document.getElementById('checkoutDetails').innerHTML = `
+                <div class="mb-20">
+                    <strong>Guest:</strong> ${guestName}<br>
+                    <strong>Room:</strong> ${roomId}
+                </div>
+            `;
+
+            document.getElementById('checkoutModal').style.display = 'block';
+        }
+
+        async function confirmCheckout() {
+            if (!currentCheckout) return;
+
+            const roomStatus = document.getElementById('roomStatusAfterCheckout').value;
+
+            try {
+                await api.checkOut(currentCheckout.assignmentId, roomStatus);
+                showAlert('Guest checked out successfully!', 'success');
+                closeModal('checkoutModal');
+                loadPendingCheckouts(); // Refresh the list
+                loadQuickStats(); // Update stats
+            } catch (error) {
+                console.error('Error checking out guest:', error);
+                showAlert('Failed to check out guest', 'error');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            // Reset form states
+            if (modalId === 'roomAssignmentModal') {
+                currentAssignment = null;
+                selectedRoom = null;
+                document.getElementById('confirmAssignmentBtn').disabled = true;
+            } else if (modalId === 'checkoutModal') {
+                currentCheckout = null;
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeModal(event.target.id);
+            }
+        }
+
+        // Load operations data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize API client with selected hotel from localStorage
+            const savedHotel = localStorage.getItem('selectedHotel');
+            if (savedHotel) {
+                const hotel = JSON.parse(savedHotel);
+                api.setSelectedHotel(hotel.property_id);
+            }
+            
+            loadOperations();
+        });
+    </script>
+</body>
+</html> 
