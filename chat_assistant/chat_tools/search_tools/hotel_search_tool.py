@@ -175,17 +175,17 @@ def extract_search_criteria_with_llm(query: str, conversation_context: str = "")
     """
     from langchain_openai import ChatOpenAI
     import os
-
-# Environment variables
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-MODEL_CONFIG = {
-    "chat_assistant": "gpt-4o-mini",
-    "function_execution": "gpt-4o",
-    "prediction": "gpt-4o",
-    "ultra_fast": "gpt-4o"
-}
     import json
     from datetime import date, timedelta
+
+    # Environment variables
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+    MODEL_CONFIG = {
+        "chat_assistant": "gpt-4o-mini",
+        "function_execution": "gpt-4o",
+        "prediction": "gpt-4o",
+        "ultra_fast": "gpt-4o"
+    }
     
     llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.0)
     

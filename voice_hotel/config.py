@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Enhanced Voice Hotel Configuration for Maximum Performance
 Optimized for low-latency OpenAI Realtime API interactions
@@ -5,12 +6,15 @@ Optimized for low-latency OpenAI Realtime API interactions
 
 import os
 import sys
+from typing import Dict, Any
 
 # Add parent directory to path to import from config
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-# Simple approach: directly set the API key
-***REMOVED*** = "***REMOVED***proj-1ReH_PyPpVc_UFF6SCPyg7T59uvPv91uihlbGBqicVyDAaRTllYW4jnwuZ1O3XaW7h-nBRKrw5T3BlbkFJjlYtdw1YXtTDzdF3oANBE40ciUnHV90oVsEEwHKkQHzYlNUfjNhVv_8YHckZF5NlBbzgkMDY0A"
+# Environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "UcqZLa941Kkt8ZhEEybf")
 
 # Redis Configuration
 REDIS_CONFIG = {
