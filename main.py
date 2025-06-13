@@ -21,6 +21,17 @@ import uuid
 import mimetypes
 from datetime import datetime
 
+# WhatsApp Business API integration
+try:
+    from whatsapp_business_api import WhatsAppBusinessAPI
+    WHATSAPP_INTEGRATION_AVAILABLE = True
+    whatsapp_api = WhatsAppBusinessAPI()
+    print("✅ WhatsApp Business API integration loaded")
+except ImportError as e:
+    print(f"⚠️ WhatsApp Business API not available: {e}")
+    WHATSAPP_INTEGRATION_AVAILABLE = False
+    whatsapp_api = None
+
 # Initialize FastAPI app
 app = FastAPI(title="ELLA Hotel Assistant", version="1.0.0")
 
@@ -287,9 +298,57 @@ async def health_check():
             "hotel_search": True,
             "booking_confirmation": True,  # Only write access ELLA has
             "media_viewing": MEDIA_TOOLS_AVAILABLE,
-            "media_upload": False  # Moved to LEON
+            "media_upload": False,  # Moved to LEON
+            "whatsapp_integration": WHATSAPP_INTEGRATION_AVAILABLE
         }
     }
+
+# 📱 WHATSAPP BUSINESS API WEBHOOK ENDPOINTS
+
+@app.get("/webhook")
+async def verify_whatsapp_webhook(request: Request):
+    """Verify webhook for WhatsApp Business API setup"""
+    if not WHATSAPP_INTEGRATION_AVAILABLE:
+        raise HTTPException(status_code=503, detail="WhatsApp integration not available")
+    
+    import os
+    WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "ella_verify_token_2024")
+    
+    mode = request.query_params.get('hub.mode')
+    token = request.query_params.get('hub.verify_token')
+    challenge = request.query_params.get('hub.challenge')
+    
+    print(f"🔍 WhatsApp webhook verification: mode={mode}, token={token}")
+    
+    if mode == 'subscribe' and token == WHATSAPP_VERIFY_TOKEN:
+        print("✅ WhatsApp webhook verified successfully")
+        return challenge
+    else:
+        print("❌ WhatsApp webhook verification failed")
+        raise HTTPException(status_code=403, detail="Webhook verification failed")
+
+@app.post("/webhook")
+async def whatsapp_webhook(request: Request):
+    """WhatsApp Business API webhook endpoint"""
+    if not WHATSAPP_INTEGRATION_AVAILABLE:
+        raise HTTPException(status_code=503, detail="WhatsApp integration not available")
+    
+    try:
+        webhook_data = await request.json()
+        
+        if not webhook_data:
+            raise HTTPException(status_code=400, detail="No JSON data")
+        
+        print("📱 WhatsApp webhook received")
+        
+        # Process webhook through WhatsApp API handler
+        result = await whatsapp_api.process_webhook(webhook_data)
+        
+        return {"status": "ok", "result": result}
+        
+    except Exception as e:
+        print(f"❌ WhatsApp webhook error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # 📸 READ-ONLY MEDIA ENDPOINTS FOR GUESTS
 
