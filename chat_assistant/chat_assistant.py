@@ -10,9 +10,18 @@ from langchain_openai import ChatOpenAI
 from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import HumanMessage, AIMessage
-from config.settings import ***REMOVED***, MODEL_CONFIG
+import os
 from memory.redis_memory import append_dialog_turn, get_dialog_history, get_full_context, get_all_dialog_turns, get_summary, store_summary
 from core.guest_id import get_guest_id
+
+# Environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+MODEL_CONFIG = {
+    "chat_assistant": "gpt-4o-mini",
+    "function_execution": "gpt-4o",
+    "prediction": "gpt-4o",
+    "ultra_fast": "gpt-4o"
+}
 
 # Import streamlined tools
 from .chat_tools import ALL_CHAT_TOOLS
@@ -135,7 +144,7 @@ def handle_chat_message(message, guest_id=None):
     llm = ChatOpenAI(
         model=MODEL_CONFIG["chat_assistant"],
         temperature=0.7,
-        openai_api_key=***REMOVED***,
+        openai_api_key=OPENAI_API_KEY,
         max_tokens=800  # Increased for richer, more detailed responses
     )
     
@@ -275,7 +284,7 @@ def create_guest_profile_summary(guest_id, thread_id):
         dialog_text = "\n".join(dialog_content)
         
         # Create LLM for summarization
-        llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.1)
+        llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.1)
         
         summary_prompt = f"""Extract ONLY guest biography and hotel preferences from this conversation.
 

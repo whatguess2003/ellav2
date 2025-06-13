@@ -1,6 +1,10 @@
 from pymongo import MongoClient
-from config.settings import MONGO_URI, MONGO_DB
+import os
 from datetime import datetime
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_DB = os.getenv("MONGO_DB", "ella_db")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 mongo_client = MongoClient(MONGO_URI)
 db = mongo_client[MONGO_DB]
@@ -153,7 +157,6 @@ def detect_critical_preferences(guest_message):
         dict: Dictionary of detected critical preferences
     """
     from langchain_openai import ChatOpenAI
-    from config.settings import ***REMOVED***
     import json
     
     # Only run detection if message might contain critical preferences
@@ -169,7 +172,7 @@ def detect_critical_preferences(guest_message):
     if not any(word in message_lower for word in trigger_words):
         return {}
     
-    llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.0)
+    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.0)
     
     detection_prompt = f"""Analyze this guest message for CRITICAL PREFERENCES that should NEVER be forgotten: "{guest_message}"
 
