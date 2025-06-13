@@ -11,7 +11,15 @@ from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import HumanMessage, AIMessage
 import os
-from memory.redis_memory import append_dialog_turn, get_dialog_history, get_full_context, get_all_dialog_turns, get_summary, store_summary
+
+# Try Redis first, fallback to simple memory
+try:
+    from memory.redis_memory import append_dialog_turn, get_dialog_history, get_full_context, get_all_dialog_turns, get_summary, store_summary
+    print("✅ Chat Assistant using Redis memory system")
+except Exception as e:
+    print(f"⚠️ Chat Assistant: Redis not available ({e}), using simple memory fallback")
+    from memory.simple_memory import append_dialog_turn, get_dialog_history, get_full_context, get_all_dialog_turns, get_summary, store_summary
+
 from core.guest_id import get_guest_id
 
 # Environment variables
