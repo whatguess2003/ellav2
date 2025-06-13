@@ -1,0 +1,7 @@
+[build]
+platform = "python"
+platform_version = "3.11"
+
+[python]
+requirements_file = "requirements.txt"
+virtual_env_name = "antenv" 
