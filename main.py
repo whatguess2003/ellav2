@@ -353,6 +353,38 @@ async def whatsapp_webhook(request: Request):
         print(f"❌ WhatsApp webhook error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/test/whatsapp-message")
+async def test_whatsapp_message(request: dict):
+    """
+    Test endpoint to simulate WhatsApp messages for ELLA
+    Send a POST request with: {"message": "your message", "phone": "your_phone_number"}
+    """
+    try:
+        message = request.get("message", "Hello ELLA")
+        phone = request.get("phone", "test_user")
+        
+        print(f"📱 TEST: Simulating WhatsApp message from {phone}: {message}")
+        
+        # Process message through ELLA
+        guest_id = f"whatsapp_{phone}"
+        result = ella_agent.handle_message(message, guest_id)
+        
+        print(f"🤖 ELLA Response: {result['message']}")
+        
+        return {
+            "status": "success",
+            "user_message": message,
+            "ella_response": result["message"],
+            "guest_id": guest_id
+        }
+        
+    except Exception as e:
+        print(f"❌ Test WhatsApp message error: {e}")
+        return {
+            "status": "error",
+            "error": str(e)
+        }
+
 # 📸 READ-ONLY MEDIA ENDPOINTS FOR GUESTS
 
 @app.get("/media/{file_id}")
