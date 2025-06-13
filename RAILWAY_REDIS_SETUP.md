@@ -18,9 +18,10 @@
 Railway will automatically create these variables:
 ```bash
 REDIS_URL=redis://default:password@redis.railway.internal:6379
-REDIS_HOST=redis.railway.internal
-REDIS_PORT=6379
-REDIS_PASSWORD=auto_generated_password
+REDISHOST=redis.railway.internal
+REDISPORT=6379
+REDISUSER=default
+REDISPASSWORD=auto_generated_password
 ```
 
 ### **3. Connect Services**
@@ -29,9 +30,10 @@ REDIS_PASSWORD=auto_generated_password
 2. **Go to "Variables" tab**
 3. **Verify these variables are available:**
    - `REDIS_URL`
-   - `REDIS_HOST` 
-   - `REDIS_PORT`
-   - `REDIS_PASSWORD`
+   - `REDISHOST` 
+   - `REDISPORT`
+   - `REDISUSER`
+   - `REDISPASSWORD`
 
 ### **4. Deploy Changes**
 
