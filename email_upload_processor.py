@@ -27,12 +27,12 @@ from langchain_openai import ChatOpenAI
 EMAIL_SERVER = os.getenv('EMAIL_SERVER', 'imap.gmail.com')
 EMAIL_USERNAME = os.getenv('EMAIL_USERNAME')  # photos@yourhotel.com
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')  # App password
-***REMOVED*** = os.getenv('***REMOVED***')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 AWS_BUCKET_NAME = "ella-hotel-media"
 
 # Initialize clients
 s3_client = boto3.client('s3', region_name='ap-southeast-1')
-llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.3) if ***REMOVED*** else None
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.3) if OPENAI_API_KEY else None
 
 class EmailUploadProcessor:
     """Process photo uploads via email"""
@@ -246,7 +246,7 @@ class EmailUploadProcessor:
                 
                 prompt = f"Create appealing 80-char description for {analysis['category']} photo from {analysis['hotel_name']}"
                 
-                llm_vision = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o-mini")
+                llm_vision = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o-mini")
                 response = llm_vision.invoke([{
                     "role": "user",
                     "content": [

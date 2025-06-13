@@ -19,12 +19,12 @@ from flask import Flask, request, render_template_string, redirect, url_for, fla
 from langchain_openai import ChatOpenAI
 
 # Configuration
-***REMOVED*** = os.getenv('***REMOVED***')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 AWS_BUCKET_NAME = "ella-hotel-media"
 
 # Initialize clients
 s3_client = boto3.client('s3', region_name='ap-southeast-1')
-llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.3) if ***REMOVED*** else None
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.3) if OPENAI_API_KEY else None
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
@@ -183,7 +183,7 @@ class WebUploadHandler:
                 
                 prompt = f"Create an appealing 80-character description for hotel guests viewing this {analysis['category']} photo from {analysis['hotel_name']}. Focus on luxury and comfort."
                 
-                llm_vision = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o-mini")
+                llm_vision = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o-mini")
                 response = llm_vision.invoke([{
                     "role": "user",
                     "content": [

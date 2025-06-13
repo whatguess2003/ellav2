@@ -23,10 +23,19 @@ import base64
 
 # Import API keys from config
 try:
-    from config.settings import ***REMOVED***
+    import os
+
+# Environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+MODEL_CONFIG = {
+    "chat_assistant": "gpt-4o-mini",
+    "function_execution": "gpt-4o",
+    "prediction": "gpt-4o",
+    "ultra_fast": "gpt-4o"
+}
     print("[OK] OpenAI API key imported from config/settings.py")
 except ImportError:
-    ***REMOVED*** = os.getenv('***REMOVED***')
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     print("[WARN] Using OpenAI API key from environment variable")
 
 # Optional cloud storage imports
@@ -83,9 +92,9 @@ class AIImageCaptioner:
         self.blip_processor = None
         
         # Initialize OpenAI if available
-        if OPENAI_AVAILABLE and ***REMOVED***:
+        if OPENAI_AVAILABLE and OPENAI_API_KEY:
             try:
-                self.openai_client = openai.OpenAI(api_key=***REMOVED***)
+                self.openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
                 print("[OK] OpenAI Vision API initialized")
             except Exception as e:
                 print(f"[WARN] OpenAI initialization failed: {e}")

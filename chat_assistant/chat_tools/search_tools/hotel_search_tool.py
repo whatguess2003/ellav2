@@ -174,11 +174,20 @@ def extract_search_criteria_with_llm(query: str, conversation_context: str = "")
         tuple: (keywords dict, filters dict, check_in date, check_out date)
     """
     from langchain_openai import ChatOpenAI
-    from config.settings import ***REMOVED***
+    import os
+
+# Environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+MODEL_CONFIG = {
+    "chat_assistant": "gpt-4o-mini",
+    "function_execution": "gpt-4o",
+    "prediction": "gpt-4o",
+    "ultra_fast": "gpt-4o"
+}
     import json
     from datetime import date, timedelta
     
-    llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.0)
+    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.0)
     
     # Build context-aware prompt
     context_info = f"\n\nCONVERSATION CONTEXT:\n{conversation_context}" if conversation_context.strip() else ""

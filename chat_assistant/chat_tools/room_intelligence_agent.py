@@ -25,7 +25,16 @@ from typing import Dict, List, Any, Optional
 import json
 from datetime import datetime, date, timedelta
 
-from config.settings import ***REMOVED***, MODEL_CONFIG
+import os
+
+# Environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+MODEL_CONFIG = {
+    "chat_assistant": "gpt-4o-mini",
+    "function_execution": "gpt-4o",
+    "prediction": "gpt-4o",
+    "ultra_fast": "gpt-4o"
+}
 from core.guest_id import get_guest_id
 import sqlite3
 import os
@@ -463,7 +472,7 @@ class RoomIntelligenceAgent:
     
     def __init__(self):
         self.llm = ChatOpenAI(
-            openai_api_key=***REMOVED***, 
+            openai_api_key=OPENAI_API_KEY, 
             model=MODEL_CONFIG["function_execution"], 
             temperature=0.1
         )

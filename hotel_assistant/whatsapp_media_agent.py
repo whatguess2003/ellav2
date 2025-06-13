@@ -7,7 +7,16 @@ Uses semantic filenames and flat storage optimized for AI search
 
 from langchain.tools import tool
 from langchain_openai import ChatOpenAI
-from config.settings import ***REMOVED***
+import os
+
+# Environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+MODEL_CONFIG = {
+    "chat_assistant": "gpt-4o-mini",
+    "function_execution": "gpt-4o",
+    "prediction": "gpt-4o",
+    "ultra_fast": "gpt-4o"
+}
 from .hotel_tools.media_manager import hotel_media_manager
 from typing import Dict, Optional, Any
 import requests
@@ -20,7 +29,7 @@ import re
 import time
 
 # Initialize AI for content analysis
-llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.3)
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.3)
 
 class WhatsAppMediaAgent:
     """Agent that processes WhatsApp media and uploads to flat storage with semantic filenames"""
