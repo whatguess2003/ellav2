@@ -11,7 +11,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from chat_assistant import get_chat_agent
 from core.guest_id import get_guest_id
-from memory.redis_memory import append_dialog_turn, get_dialog_history
+
+# Try Redis first, fallback to simple memory
+try:
+    from memory.redis_memory import append_dialog_turn, get_dialog_history
+    print("✅ Using Redis memory system")
+except Exception as e:
+    print(f"⚠️ Redis not available ({e}), using simple memory fallback")
+    from memory.simple_memory import append_dialog_turn, get_dialog_history
+
 import json
 import os
 from pathlib import Path
