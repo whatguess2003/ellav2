@@ -4,7 +4,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "gunicorn --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT app:app",
-    "healthcheckPath": "/health"
+    "startCommand": "gunicorn --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT app:app"
   }
 } 
