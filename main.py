@@ -1294,10 +1294,15 @@ async def get_bookings_calendar(property_id: str, start_date: str, days: int = 3
 
 if __name__ == "__main__":
     import uvicorn
+    import os
+    
+    # Use Azure's PORT environment variable, fallback to 8001 for local
+    port = int(os.getenv("PORT", 8001))
+    
     print("Starting ELLA Unified PMS API Server...")
     print("Unified backend for both guest chat and dashboard interfaces")
     print("Guest chat: READ-ONLY search and booking system")
     print("Dashboard: Full PMS management capabilities")
-    print("Guest interface: http://localhost:8001")
-    print("Dashboard interface: http://localhost:8001/static/leon_dashboard.html")
-    uvicorn.run(app, host="0.0.0.0", port=8001) 
+    print(f"Guest interface: http://localhost:{port}")
+    print(f"Dashboard interface: http://localhost:{port}/static/leon_dashboard.html")
+    uvicorn.run(app, host="0.0.0.0", port=port) 
