@@ -21,10 +21,6 @@ from PIL import Image, ImageOps
 import io
 import base64
 
-# Import API keys from config
-try:
-    import os
-
 # Environment variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 MODEL_CONFIG = {
@@ -33,10 +29,7 @@ MODEL_CONFIG = {
     "prediction": "gpt-4o",
     "ultra_fast": "gpt-4o"
 }
-    print("[OK] OpenAI API key imported from config/settings.py")
-except ImportError:
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-    print("[WARN] Using OpenAI API key from environment variable")
+print("[OK] OpenAI API key loaded from environment variables")
 
 # Optional cloud storage imports
 try:
