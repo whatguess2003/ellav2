@@ -1,1 +1,1 @@
-bash startup.sh 
+gunicorn --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 600 --access-logfile '-' --error-logfile '-' app:app 
