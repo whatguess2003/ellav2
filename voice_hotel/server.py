@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 ELLA Voice Hotel Assistant Server - Clean Implementation
 Fixed all import and startup issues
@@ -8,6 +9,7 @@ import json
 import logging
 import time
 import uuid
+import os
 from typing import Optional, Dict
 
 import uvicorn
@@ -20,16 +22,20 @@ from openai import AsyncOpenAI
 # Import our functions and config
 from .functions import search_hotels, get_hotel_details, get_room_types, check_availability, check_booking_status, initiate_chat_handoff
 from .config import (
-    ***REMOVED***, REDIS_CONFIG, VOICE_MODEL, INSTRUCTIONS, 
-    VOICE_SETTINGS, REALTIME_VOICE_FUNCTIONS, AUDIO_CONFIG, TURN_DETECTION_CONFIG
+    REDIS_CONFIG, VOICE_MODEL, INSTRUCTIONS, 
+    VOICE_SETTINGS, REALTIME_VOICE_FUNCTIONS, AUDIO_CONFIG, TURN_DETECTION_CONFIG,
+    PERFORMANCE_CONFIG, QUICK_RESPONSES, SEARCH_CONFIG, get_guest_id
 )
+
+# Environment variables
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Setup
 app = FastAPI(title="ELLA Voice Hotel", version="2.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 # Clients
-openai_client = AsyncOpenAI(api_key=***REMOVED***)
+openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 redis_client = redis.Redis(**REDIS_CONFIG)
 
 # Logging
@@ -51,7 +57,7 @@ async def health():
         "status": "healthy",
         "model": VOICE_MODEL,
         "voice": VOICE_SETTINGS,
-        "openai_configured": bool(***REMOVED***)
+        "openai_configured": bool(OPENAI_API_KEY)
     }
 
 @app.post("/voice/ephemeral-token")
