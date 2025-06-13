@@ -425,9 +425,15 @@ async def verify_whatsapp_webhook(request: Request):
 async def whatsapp_webhook(request: Request):
     """WhatsApp Business API webhook endpoint"""
     try:
+        # Log all incoming requests for debugging
+        print(f"🔍 WEBHOOK DEBUG: Received request from {request.client.host if request.client else 'unknown'}")
+        print(f"🔍 WEBHOOK DEBUG: Headers: {dict(request.headers)}")
+        print(f"🔍 WEBHOOK DEBUG: Method: {request.method}")
+        
         webhook_data = await request.json()
         
         if not webhook_data:
+            print("❌ WEBHOOK DEBUG: No JSON data received")
             raise HTTPException(status_code=400, detail="No JSON data")
         
         print("📱 WhatsApp webhook received:")
@@ -444,7 +450,34 @@ async def whatsapp_webhook(request: Request):
         
     except Exception as e:
         print(f"❌ WhatsApp webhook error: {e}")
+        print(f"🔍 WEBHOOK DEBUG: Exception details: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/test/webhook-debug")
+async def test_webhook_debug():
+    """Debug endpoint to check webhook configuration"""
+    import os
+    
+    return {
+        "webhook_url": "https://web-production-2a2c9.up.railway.app/webhook",
+        "verify_token": os.getenv("WHATSAPP_VERIFY_TOKEN", "ella_verify_token_2024"),
+        "webhook_accessible": True,
+        "instructions": {
+            "facebook_webhook_setup": [
+                "1. Go to Facebook Developers → Your App → WhatsApp → Configuration",
+                "2. Set Webhook URL: https://web-production-2a2c9.up.railway.app/webhook",
+                "3. Set Verify Token: ella_verify_token_2024",
+                "4. Subscribe to 'messages' events",
+                "5. Test the webhook connection"
+            ]
+        },
+        "debug_tips": [
+            "Check Railway logs for incoming requests",
+            "Verify webhook URL is reachable from Facebook",
+            "Ensure verify token matches exactly",
+            "Check WhatsApp Business API app permissions"
+        ]
+    }
 
 @app.post("/test/whatsapp-message")
 async def test_whatsapp_message(request: dict):
