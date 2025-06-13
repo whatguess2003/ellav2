@@ -309,9 +309,6 @@ async def health_check():
 @app.get("/webhook")
 async def verify_whatsapp_webhook(request: Request):
     """Verify webhook for WhatsApp Business API setup"""
-    if not WHATSAPP_INTEGRATION_AVAILABLE:
-        raise HTTPException(status_code=503, detail="WhatsApp integration not available")
-    
     import os
     WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "ella_verify_token_2024")
     
@@ -319,33 +316,37 @@ async def verify_whatsapp_webhook(request: Request):
     token = request.query_params.get('hub.verify_token')
     challenge = request.query_params.get('hub.challenge')
     
-    print(f"🔍 WhatsApp webhook verification: mode={mode}, token={token}")
+    print(f"🔍 WhatsApp webhook verification: mode={mode}, token={token}, challenge={challenge}")
+    print(f"🔍 Expected token: {WHATSAPP_VERIFY_TOKEN}")
     
     if mode == 'subscribe' and token == WHATSAPP_VERIFY_TOKEN:
         print("✅ WhatsApp webhook verified successfully")
         return challenge
     else:
         print("❌ WhatsApp webhook verification failed")
+        print(f"❌ Mode check: {mode == 'subscribe'}, Token check: {token == WHATSAPP_VERIFY_TOKEN}")
         raise HTTPException(status_code=403, detail="Webhook verification failed")
 
 @app.post("/webhook")
 async def whatsapp_webhook(request: Request):
     """WhatsApp Business API webhook endpoint"""
-    if not WHATSAPP_INTEGRATION_AVAILABLE:
-        raise HTTPException(status_code=503, detail="WhatsApp integration not available")
-    
     try:
         webhook_data = await request.json()
         
         if not webhook_data:
             raise HTTPException(status_code=400, detail="No JSON data")
         
-        print("📱 WhatsApp webhook received")
+        print("📱 WhatsApp webhook received:")
+        print(f"📱 Data: {webhook_data}")
         
-        # Process webhook through WhatsApp API handler
-        result = await whatsapp_api.process_webhook(webhook_data)
-        
-        return {"status": "ok", "result": result}
+        # For now, just acknowledge the webhook
+        # TODO: Process webhook through WhatsApp API handler when integration is ready
+        if WHATSAPP_INTEGRATION_AVAILABLE and whatsapp_api:
+            result = await whatsapp_api.process_webhook(webhook_data)
+            return {"status": "ok", "result": result}
+        else:
+            print("📱 WhatsApp integration not available, acknowledging webhook")
+            return {"status": "ok", "message": "Webhook received"}
         
     except Exception as e:
         print(f"❌ WhatsApp webhook error: {e}")
