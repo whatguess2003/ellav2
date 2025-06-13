@@ -1,35 +1,42 @@
 #!/bin/bash
-set -e
 
 echo "=== ELLA STARTUP SCRIPT ==="
 echo "Current directory: $(pwd)"
-echo "Python version: $(python --version)"
-echo "Pip version: $(pip --version)"
+echo "Python version: $(python3 --version)"
+echo "Pip version: $(pip3 --version)"
 
-echo "=== INSTALLING MINIMAL DEPENDENCIES FIRST ==="
-pip install --upgrade pip
-pip install fastapi==0.95.2 uvicorn==0.24.0 gunicorn==21.2.0 --no-cache-dir --force-reinstall
-
-echo "=== VERIFYING CORE INSTALLATIONS ==="
-python -c "import fastapi; print('✅ FastAPI:', fastapi.__version__)"
-python -c "import uvicorn; print('✅ Uvicorn:', uvicorn.__version__)"
-python -c "import gunicorn; print('✅ Gunicorn:', gunicorn.__version__)"
-
-echo "=== INSTALLING REMAINING DEPENDENCIES ==="
-if [ -f "requirements.txt" ]; then
-    pip install -r requirements.txt --no-cache-dir
+# Check if virtual environment exists
+if [ ! -d "antenv" ]; then
+    echo "Virtual environment not found. Creating one..."
+    python3 -m venv antenv
+    source antenv/bin/activate
+    echo "Installing dependencies..."
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    echo "Dependencies installed successfully"
 else
-    echo "⚠️ requirements.txt not found, using minimal setup"
+    echo "Virtual environment found. Activating..."
+    source antenv/bin/activate
 fi
 
-echo "=== TESTING APP IMPORT ==="
-python -c "from app import app; print('✅ App imports successfully')" || {
-    echo "❌ App import failed, trying to install missing dependencies..."
-    pip install requests python-dotenv pydantic --no-cache-dir
-    python -c "from app import app; print('✅ App imports successfully after retry')"
+# Verify critical packages are installed
+echo "Checking critical packages..."
+python3 -c "import fastapi; print('FastAPI:', fastapi.__version__)" 2>/dev/null || {
+    echo "FastAPI not found. Installing dependencies..."
+    pip install -r requirements.txt
 }
 
-echo "=== STARTING APPLICATION ==="
-echo "Command: gunicorn --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 600 app:app"
+python3 -c "import uvicorn; print('Uvicorn:', uvicorn.__version__)" 2>/dev/null || {
+    echo "Uvicorn not found. Installing dependencies..."
+    pip install -r requirements.txt
+}
 
-exec gunicorn --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 600 app:app 
+python3 -c "import gunicorn; print('Gunicorn:', gunicorn.__version__)" 2>/dev/null || {
+    echo "Gunicorn not found. Installing dependencies..."
+    pip install -r requirements.txt
+}
+
+echo "All dependencies verified. Starting application..."
+
+# Start the application
+exec gunicorn --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 app:app 
