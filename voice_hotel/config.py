@@ -16,11 +16,10 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "UcqZLa941Kkt8ZhEEybf")
 
-# Redis Configuration
+# Redis Configuration - use Railway Redis URL
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 REDIS_CONFIG = {
-    "host": "localhost",
-    "port": 6379,
-    "db": 0,
+    "url": REDIS_URL,
     "decode_responses": True
 }
 

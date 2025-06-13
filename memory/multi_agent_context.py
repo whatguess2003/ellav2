@@ -29,12 +29,8 @@ from typing import Dict, Any, Optional, List
 import os
 
 # Initialize Redis connection
-redis_client = redis.Redis(
-    host=os.getenv('REDIS_HOST', 'localhost'),
-    port=int(os.getenv('REDIS_PORT', 6379)),
-    db=int(os.getenv('REDIS_DB', 1)),
-    decode_responses=True
-)
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/1")
+redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
 
 class MultiAgentContext:
     """Shared context system for multi-agent coordination"""

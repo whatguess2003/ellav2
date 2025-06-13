@@ -36,7 +36,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 
 # Clients
 openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
-redis_client = redis.Redis(**REDIS_CONFIG)
+redis_client = redis.Redis.from_url(REDIS_CONFIG["url"], decode_responses=REDIS_CONFIG["decode_responses"])
 
 # Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
