@@ -28,12 +28,12 @@ from langchain_openai import ChatOpenAI
 WHATSAPP_TOKEN = os.getenv('WHATSAPP_ACCESS_TOKEN')  # From Meta Business
 WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID')
 WHATSAPP_VERIFY_TOKEN = os.getenv('WHATSAPP_VERIFY_TOKEN')
-***REMOVED*** = os.getenv('***REMOVED***')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 AWS_BUCKET_NAME = "ella-hotel-media"
 
 # Initialize clients
 s3_client = boto3.client('s3', region_name='ap-southeast-1')
-llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.3) if ***REMOVED*** else None
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.3) if OPENAI_API_KEY else None
 
 class WhatsAppDirectMediaHandler:
     """Direct WhatsApp Business API media handling"""
@@ -241,7 +241,7 @@ class WhatsAppDirectMediaHandler:
                 
                 prompt = f"Create appealing 80-char description for {analysis['category']} photo from {analysis['hotel_name']}"
                 
-                llm_vision = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o-mini")
+                llm_vision = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o-mini")
                 response = llm_vision.invoke([{
                     "role": "user",
                     "content": [

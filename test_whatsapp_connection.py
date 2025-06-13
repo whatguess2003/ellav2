@@ -5,11 +5,12 @@ Test WhatsApp Business API Connection
 import asyncio
 import httpx
 import json
-from settings import (
-    WHATSAPP_ACCESS_TOKEN,
-    WHATSAPP_PHONE_NUMBER_ID,
-    WHATSAPP_API_VERSION
-)
+import os
+
+# Environment variables
+WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN", "")
+WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
+WHATSAPP_API_VERSION = os.getenv("WHATSAPP_API_VERSION", "v22.0")
 
 async def test_whatsapp_connection():
     """Test the WhatsApp Business API connection"""

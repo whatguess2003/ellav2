@@ -20,21 +20,19 @@ from flask import Flask, request
 # AI imports
 from langchain_openai import ChatOpenAI
 
-# Import settings
-from settings import (
-    WHATSAPP_ACCESS_TOKEN,
-    WHATSAPP_PHONE_NUMBER_ID,
-    WHATSAPP_VERIFY_TOKEN,
-    WHATSAPP_API_VERSION,
-    ***REMOVED***,
-    AWS_BUCKET_NAME,
-    AWS_REGION,
-    DATABASE_PATH
-)
+# Environment variables
+WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN", "")
+WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
+WHATSAPP_VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN", "ella_verify_token_2024")
+WHATSAPP_API_VERSION = os.getenv("WHATSAPP_API_VERSION", "v22.0")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME", "ella-hotel-media")
+AWS_REGION = os.getenv("AWS_REGION", "ap-southeast-1")
+DATABASE_PATH = os.getenv("DATABASE_PATH", "ella_hotel_assistant.db")
 
 # Initialize clients
 s3_client = boto3.client('s3', region_name=AWS_REGION)
-llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.3) if ***REMOVED*** else None
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.3) if OPENAI_API_KEY else None
 
 class WhatsAppBusinessAPI:
     """Direct WhatsApp Business API integration for hotel photo uploads"""
@@ -350,7 +348,7 @@ class WhatsAppBusinessAPI:
                 """
                 
                 # Use GPT-4 Vision
-                llm_vision = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o-mini")
+                llm_vision = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o-mini")
                 response = llm_vision.invoke([{
                     "role": "user",
                     "content": [

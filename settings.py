@@ -7,16 +7,16 @@ All API keys, database paths, and system configurations
 import os
 
 # Database Configuration
-DATABASE_PATH = "ella_hotel_assistant.db"
+DATABASE_PATH = os.getenv("DATABASE_PATH", "ella_hotel_assistant.db")
 
 # OpenAI Configuration
-***REMOVED*** = "***REMOVED***proj-CmJ5NMPhZNLGNa_LHC6vnlZONBUPRN_8gBG7UxpKZz8GJj6CLHW4tUNc79T3BlbkFJVYE8E--kGVKAYTL0s02Z8geFw"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # AWS Configuration
-AWS_ACCESS_KEY_ID = "your_aws_access_key_here"
-AWS_SECRET_ACCESS_KEY = "your_aws_secret_key_here"
-AWS_REGION = "ap-southeast-1"
-AWS_BUCKET_NAME = "ella-hotel-media"
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+AWS_REGION = os.getenv("AWS_REGION", "ap-southeast-1")
+AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME", "ella-hotel-media")
 
 # WhatsApp Business API Configuration
 WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN", "")
@@ -62,5 +62,5 @@ MAX_FAILED_ATTEMPTS = 5
 print("⚙️ Settings loaded successfully")
 print(f"📱 WhatsApp Phone Number ID: {WHATSAPP_PHONE_NUMBER_ID}")
 print(f"🔑 WhatsApp API: {'✅ Configured' if WHATSAPP_ACCESS_TOKEN else '❌ Not configured'}")
-print(f"☁️ AWS S3 Bucket: {AWS_BUCKET_NAME}")
-print(f"🤖 OpenAI: {'✅ Configured' if ***REMOVED*** else '❌ Not configured'}") 
+print(f"🤖 OpenAI API: {'✅ Configured' if OPENAI_API_KEY else '❌ Not configured'}")
+print(f"☁️ AWS S3 Bucket: {AWS_BUCKET_NAME}") 

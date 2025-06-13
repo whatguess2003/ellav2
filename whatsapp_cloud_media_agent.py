@@ -20,10 +20,10 @@ import boto3
 import base64
 
 # Get OpenAI API key
-***REMOVED*** = os.getenv('***REMOVED***')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 # Initialize AI for content analysis
-llm = ChatOpenAI(openai_api_key=***REMOVED***, model="gpt-4o", temperature=0.3)
+llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-4o", temperature=0.3)
 
 # AWS Configuration
 AWS_BUCKET_NAME = "ella-hotel-media"
@@ -296,7 +296,7 @@ Create a compelling, descriptive caption that:
 Focus on guest benefits and visual appeal."""
 
             llm_vision = ChatOpenAI(
-                openai_api_key=***REMOVED***, 
+                openai_api_key=OPENAI_API_KEY, 
                 model="gpt-4o-mini", 
                 temperature=0.3
             )
