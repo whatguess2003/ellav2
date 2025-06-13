@@ -365,6 +365,38 @@ async def test_redis_connection():
             }
         }
 
+@app.get("/test/whatsapp-config")
+async def test_whatsapp_configuration():
+    """Test WhatsApp Business API configuration"""
+    import os
+    
+    whatsapp_access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
+    whatsapp_phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+    whatsapp_verify_token = os.getenv("WHATSAPP_VERIFY_TOKEN")
+    
+    config_status = {
+        "whatsapp_access_token": "✅ Set" if whatsapp_access_token else "❌ Missing",
+        "whatsapp_phone_number_id": "✅ Set" if whatsapp_phone_number_id else "❌ Missing",
+        "whatsapp_verify_token": "✅ Set" if whatsapp_verify_token else "❌ Missing"
+    }
+    
+    all_configured = all([whatsapp_access_token, whatsapp_phone_number_id, whatsapp_verify_token])
+    
+    return {
+        "status": "success" if all_configured else "incomplete",
+        "message": "WhatsApp configuration complete" if all_configured else "WhatsApp configuration incomplete",
+        "configuration": config_status,
+        "webhook_url": "https://web-production-2a2c9.up.railway.app/webhook",
+        "instructions": {
+            "missing_variables": "Add these to Railway Dashboard → Variables:",
+            "required": [
+                "WHATSAPP_ACCESS_TOKEN=your_access_token",
+                "WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id", 
+                "WHATSAPP_VERIFY_TOKEN=ella_verify_token_2024"
+            ]
+        } if not all_configured else None
+    }
+
 # 📱 WHATSAPP BUSINESS API WEBHOOK ENDPOINTS
 
 @app.get("/webhook")

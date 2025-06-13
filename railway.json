@@ -18,6 +18,9 @@
         "REDISPORT": "${{Redis.REDISPORT}}",
         "REDISUSER": "${{Redis.REDISUSER}}",
         "REDISPASSWORD": "${{Redis.REDISPASSWORD}}",
+        "WHATSAPP_ACCESS_TOKEN": "${{WHATSAPP_ACCESS_TOKEN}}",
+        "WHATSAPP_PHONE_NUMBER_ID": "${{WHATSAPP_PHONE_NUMBER_ID}}",
+        "WHATSAPP_VERIFY_TOKEN": "${{WHATSAPP_VERIFY_TOKEN}}",
         "PYTHON_VERSION": "3.11",
         "ENVIRONMENT": "production"
       }
