@@ -6,7 +6,7 @@ Deployed: 2025-06-13 03:55 UTC
 """
 
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from chat_assistant import get_chat_agent
@@ -321,7 +321,8 @@ async def verify_whatsapp_webhook(request: Request):
     
     if mode == 'subscribe' and token == WHATSAPP_VERIFY_TOKEN:
         print("✅ WhatsApp webhook verified successfully")
-        return challenge
+        # Return challenge as plain text (not JSON)
+        return PlainTextResponse(content=challenge)
     else:
         print("❌ WhatsApp webhook verification failed")
         print(f"❌ Mode check: {mode == 'subscribe'}, Token check: {token == WHATSAPP_VERIFY_TOKEN}")
