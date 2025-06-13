@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "uvicorn main:app --host 0.0.0.0 --port $PORT",
+    "startCommand": "python railway_deploy.py",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
@@ -18,9 +18,15 @@
         "REDISPORT": "${{Redis.REDISPORT}}",
         "REDISUSER": "${{Redis.REDISUSER}}",
         "REDISPASSWORD": "${{Redis.REDISPASSWORD}}",
-        "WHATSAPP_ACCESS_TOKEN": "${{WHATSAPP_ACCESS_TOKEN}}",
-        "WHATSAPP_PHONE_NUMBER_ID": "${{WHATSAPP_PHONE_NUMBER_ID}}",
-        "WHATSAPP_VERIFY_TOKEN": "${{WHATSAPP_VERIFY_TOKEN}}",
+        "DATABASE_URL": "${{Postgres.DATABASE_URL}}",
+        "PGHOST": "${{Postgres.PGHOST}}",
+        "PGPORT": "${{Postgres.PGPORT}}",
+        "PGDATABASE": "${{Postgres.PGDATABASE}}",
+        "PGUSER": "${{Postgres.PGUSER}}",
+        "PGPASSWORD": "${{Postgres.PGPASSWORD}}",
+        "WHATSAPP_ACCESS_TOKEN": "",
+        "WHATSAPP_PHONE_NUMBER_ID": "",
+        "WHATSAPP_VERIFY_TOKEN": "ella_verify_token_2024",
         "PYTHON_VERSION": "3.11",
         "ENVIRONMENT": "production"
       }

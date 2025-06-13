@@ -37,6 +37,15 @@ except ImportError as e:
     print(f"⚠️ WhatsApp Business API not available: {e}")
     WHATSAPP_INTEGRATION_AVAILABLE = False
 
+# Database setup
+try:
+    from database.connection import db_manager, check_availability, search_hotels, get_hotel_details
+    DATABASE_AVAILABLE = True
+    print(f"✅ Database connection initialized ({'PostgreSQL' if db_manager.is_production else 'SQLite'})")
+except ImportError as e:
+    print(f"⚠️ Database connection not available: {e}")
+    DATABASE_AVAILABLE = False
+
 # Initialize FastAPI app
 app = FastAPI(title="ELLA Hotel Assistant", version="1.0.0")
 
@@ -1626,6 +1635,46 @@ async def get_bookings_calendar(property_id: str, start_date: str, days: int = 3
     except Exception as e:
         print(f"Dashboard bookings calendar error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/test/database")
+async def test_database_connection():
+    """Test database connection and basic operations"""
+    if not DATABASE_AVAILABLE:
+        return {
+            "status": "error",
+            "message": "Database not available",
+            "database_type": "none"
+        }
+    
+    try:
+        # Test basic connection
+        hotels = search_hotels("Kuala Lumpur")
+        
+        # Test availability check
+        if hotels:
+            availability = check_availability(hotels[0]['name'], "2024-01-15")
+        else:
+            availability = {"success": False, "message": "No hotels to test"}
+        
+        return {
+            "status": "success",
+            "message": "Database connection successful",
+            "database_type": "PostgreSQL" if db_manager.is_production else "SQLite",
+            "environment": "production" if db_manager.is_production else "development",
+            "test_results": {
+                "hotels_found": len(hotels),
+                "sample_hotel": hotels[0]['name'] if hotels else None,
+                "availability_check": availability['success'],
+                "available_rooms": len(availability.get('available_rooms', []))
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Database test failed: {str(e)}",
+            "database_type": "PostgreSQL" if db_manager.is_production else "SQLite"
+        }
 
 if __name__ == "__main__":
     import uvicorn
