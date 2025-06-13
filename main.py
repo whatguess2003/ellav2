@@ -312,6 +312,59 @@ async def health_check():
         }
     }
 
+@app.get("/test/redis")
+async def test_redis_connection():
+    """Test Redis connection and functionality"""
+    try:
+        # Test Redis connection
+        from memory.redis_memory import redis_client
+        
+        # Test basic operations
+        redis_client.ping()
+        
+        # Test set/get
+        test_key = "test:connection"
+        test_value = "Redis connected successfully!"
+        redis_client.set(test_key, test_value, ex=60)  # Expire in 60 seconds
+        retrieved_value = redis_client.get(test_key)
+        
+        # Test list operations (used for dialog history)
+        list_key = "test:list"
+        redis_client.delete(list_key)  # Clean up first
+        redis_client.rpush(list_key, "message1", "message2", "message3")
+        list_length = redis_client.llen(list_key)
+        list_items = redis_client.lrange(list_key, 0, -1)
+        redis_client.delete(list_key)  # Clean up
+        
+        # Clean up test key
+        redis_client.delete(test_key)
+        
+        return {
+            "status": "success",
+            "message": "Redis connection successful",
+            "tests": {
+                "ping": "✅ Connected",
+                "set_get": f"✅ {retrieved_value}",
+                "list_operations": f"✅ List length: {list_length}, Items: {list_items}"
+            },
+            "redis_info": {
+                "connected": True,
+                "memory_system": "Redis (Production)"
+            }
+        }
+        
+    except Exception as e:
+        print(f"❌ Redis connection test failed: {e}")
+        return {
+            "status": "error",
+            "message": f"Redis connection failed: {str(e)}",
+            "redis_info": {
+                "connected": False,
+                "memory_system": "Simple Memory (Fallback)",
+                "error": str(e)
+            }
+        }
+
 # 📱 WHATSAPP BUSINESS API WEBHOOK ENDPOINTS
 
 @app.get("/webhook")
