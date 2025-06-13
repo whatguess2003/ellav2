@@ -9,13 +9,15 @@ if not REDIS_URL:
     error_msg = """
     ❌ REDIS_URL environment variable not found.
     
-    🔧 To fix this:
+    🔧 To fix this in Railway Dashboard:
     1. Go to Railway Dashboard → Your Project → Web Service
     2. Click "Variables" tab
-    3. Add: REDIS_URL = redis://default:wiDfGnlRTAvzzPwrokazDitZXZjHMzNf@interchange.proxy.rlwy.net:57868
-    4. Or add: REDIS_URL = ${{Redis.REDIS_URL}} (if Redis service exists)
+    3. Add: REDIS_URL = ${{Redis.REDIS_URL}}
     
-    📋 Make sure you have added Redis service to your Railway project.
+    📋 Make sure you have:
+    - Added Redis service to your Railway project
+    - Redis service is running and healthy
+    - Web service can reference Redis service variables
     """
     print(error_msg)
     raise ValueError("REDIS_URL environment variable not found. Please add Redis service to Railway project.")
@@ -24,10 +26,10 @@ try:
     redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
     # Test connection
     redis_client.ping()
-    print(f"✅ Redis connected successfully to: {REDIS_URL[:20]}...")
+    print(f"✅ Redis connected successfully via Railway")
 except Exception as e:
     print(f"❌ Redis connection failed: {e}")
-    print(f"🔧 Check if REDIS_URL is correct: {REDIS_URL[:50]}...")
+    print(f"🔧 Check Railway Redis service status and variables")
     raise
 
 # ============================================================================
