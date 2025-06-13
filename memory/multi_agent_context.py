@@ -28,8 +28,11 @@ from datetime import datetime, date, timedelta
 from typing import Dict, Any, Optional, List
 import os
 
-# Initialize Redis connection
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/1")
+# Initialize Redis connection - Railway automatically provides REDIS_URL
+REDIS_URL = os.getenv("REDIS_URL")
+if not REDIS_URL:
+    raise ValueError("REDIS_URL environment variable not found. Please add Redis service to Railway project.")
+
 redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
 
 class MultiAgentContext:

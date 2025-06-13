@@ -11,8 +11,11 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict
 from .guest_id import get_guest_id
 
-# Redis connection - use Railway Redis URL
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+# Railway automatically provides REDIS_URL when Redis service is added
+REDIS_URL = os.getenv("REDIS_URL")
+if not REDIS_URL:
+    raise ValueError("REDIS_URL environment variable not found. Please add Redis service to Railway project.")
+
 redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
 
 def store_concierge_session(

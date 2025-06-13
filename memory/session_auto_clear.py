@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """
-Session Auto-Clear Module
-Handles automatic clearing of stale search sessions based on time passage and date changes.
+Session Auto-Clear System
+Automatically clears stale search sessions and dialog history
 """
 
 import redis
-import os
 import json
+import os
 import time
 from datetime import datetime, timezone, timedelta
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+# Railway automatically provides REDIS_URL when Redis service is added
+REDIS_URL = os.getenv("REDIS_URL")
+if not REDIS_URL:
+    raise ValueError("REDIS_URL environment variable not found. Please add Redis service to Railway project.")
+
 redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
 
 def is_session_stale(session_data):

@@ -1,6 +1,10 @@
 import os
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+# Railway automatically provides REDIS_URL when Redis service is added
+REDIS_URL = os.getenv("REDIS_URL")
+if not REDIS_URL:
+    raise ValueError("REDIS_URL environment variable not found. Please add Redis service to Railway project.")
+
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 MONGO_DB = os.getenv("MONGO_DB", "ella_db")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")

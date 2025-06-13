@@ -16,8 +16,11 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "UcqZLa941Kkt8ZhEEybf")
 
-# Redis Configuration - use Railway Redis URL
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+# Redis Configuration - Railway automatically provides REDIS_URL
+REDIS_URL = os.getenv("REDIS_URL")
+if not REDIS_URL:
+    raise ValueError("REDIS_URL environment variable not found. Please add Redis service to Railway project.")
+
 REDIS_CONFIG = {
     "url": REDIS_URL,
     "decode_responses": True
