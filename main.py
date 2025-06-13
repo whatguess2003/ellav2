@@ -2,6 +2,7 @@
 """
 ELLA Hotel Assistant - Guest-Facing Chat Server
 READ-ONLY access to media and database (except booking confirmations)
+Deployed: 2025-06-13 03:55 UTC
 """
 
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Form
