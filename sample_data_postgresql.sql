@@ -1,5 +1,5 @@
--- ELLA Hotel System Sample Data
--- Run this script AFTER database_schema.sql
+-- ELLA Hotel System Sample Data - PostgreSQL Version
+-- Run this script AFTER database_schema_postgresql.sql
 -- Database: ella_hotel
 
 -- Insert sample hotels
@@ -36,8 +36,7 @@ INSERT INTO room_types (hotel_id, name, slug, max_occupancy, base_price, ameniti
 (3, 'Deluxe Sea View', 'deluxe-sea', 2, 280.00, ARRAY['King Bed', 'Sea View', 'Balcony', 'WiFi']),
 (3, 'Superior Garden View', 'superior-garden', 2, 220.00, ARRAY['Queen Bed', 'Garden View', 'WiFi', 'AC']);
 
--- Generate availability for next 30 days
--- This uses a more complex query to generate dates and pricing
+-- Generate availability for next 30 days using PostgreSQL generate_series
 WITH date_series AS (
     SELECT generate_series(
         CURRENT_DATE,
@@ -64,7 +63,7 @@ SELECT room_type_id, date, available_rooms, price
 FROM room_pricing
 ORDER BY room_type_id, date;
 
--- Insert sample guest
+-- Insert sample guests
 INSERT INTO guests (phone, name, email, nationality) VALUES
 ('+60123456789', 'Ahmad Rahman', 'ahmad.rahman@email.com', 'Malaysian'),
 ('+60198765432', 'Sarah Lim', 'sarah.lim@email.com', 'Malaysian'),

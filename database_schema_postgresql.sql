@@ -1,5 +1,5 @@
--- ELLA Hotel System Database Schema
--- Run this script in pgAdmin4 Query Tool
+-- ELLA Hotel System Database Schema - PostgreSQL Version
+-- Run this script in Google Cloud SQL PostgreSQL or any PostgreSQL database
 -- Database: ella_hotel
 
 -- Drop tables if they exist (for clean reinstall)

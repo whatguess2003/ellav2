@@ -1,5 +1,5 @@
--- ELLA Hotel Database Test Script
--- Run this to verify your database setup is working correctly
+-- ELLA Hotel Database Test Script - PostgreSQL Version
+-- Run this to verify your PostgreSQL database setup is working correctly
 
 -- Test 1: Check PostgreSQL version
 SELECT 'PostgreSQL Version:' as test, version() as result;
@@ -63,7 +63,14 @@ JOIN hotels h ON b.hotel_id = h.id
 JOIN room_types rt ON b.room_type_id = rt.id
 LIMIT 1;
 
+-- Test 8: Check array amenities (PostgreSQL specific)
+SELECT 
+    'Hotel Amenities:' as test,
+    h.name || ' - ' || array_to_string(h.amenities[1:3], ', ') as amenities_sample
+FROM hotels h
+LIMIT 3;
+
 -- Final success message
 SELECT 
     '🎉 Database Test Complete!' as message,
-    'Your ELLA hotel database is ready to use!' as status; 
+    'Your ELLA hotel PostgreSQL database is ready to use!' as status; 

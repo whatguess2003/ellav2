@@ -1,5 +1,5 @@
 """
-Cloud Database Connection Manager for Ella
+PostgreSQL Database Connection Manager for ELLA
 Supports both SQLite (local) and PostgreSQL (cloud) databases
 """
 
@@ -19,10 +19,8 @@ except ImportError:
     print("📍 psycopg2 not available - PostgreSQL support disabled")
     POSTGRES_AVAILABLE = False
     psycopg2 = None
-    SimpleConnectionPool = None
-    RealDictCursor = None
 
-class CloudDatabaseManager:
+class PostgreSQLDatabaseManager:
     """Universal database manager for SQLite and PostgreSQL"""
     
     def __init__(self):
@@ -59,6 +57,7 @@ class CloudDatabaseManager:
         print(f"✅ Using SQLite database: {self.db_path}")
         self.db_type = 'sqlite'
         self.connection_pool = None
+        self.is_postgres = False
     
     @contextmanager
     def get_connection(self) -> Generator[Any, None, None]:
@@ -97,15 +96,47 @@ class CloudDatabaseManager:
     
     def execute_query(self, query: str, params: tuple = None) -> list:
         """Execute SELECT query and return results"""
+        # Convert SQLite query to PostgreSQL if needed
+        if self.is_postgres:
+            query = self.convert_sqlite_to_postgres_query(query)
+            # PostgreSQL uses %s placeholders like SQLite uses ?
+            if params and '?' in query:
+                query = query.replace('?', '%s')
+        
         with self.get_cursor() as cursor:
             if params:
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
-            return cursor.fetchall()
+            
+            results = cursor.fetchall()
+            
+            # Convert to consistent format
+            if self.is_postgres:
+                return [dict(row) for row in results] if results else []
+            else:
+                return [dict(row) for row in results] if results else []
     
     def execute_insert(self, query: str, params: tuple = None) -> Optional[Any]:
         """Execute INSERT query and return last row ID"""
+        # Convert SQLite query to PostgreSQL if needed
+        if self.is_postgres:
+            query = self.convert_sqlite_to_postgres_query(query)
+            # Add RETURNING clause for PostgreSQL to get the ID
+            if 'INSERT INTO' in query.upper() and 'RETURNING' not in query.upper():
+                # Find the table name to determine the ID column
+                table_name = query.split('INSERT INTO')[1].split('(')[0].strip()
+                if 'hotels' in table_name:
+                    query += ' RETURNING id'
+                elif 'bookings' in table_name:
+                    query += ' RETURNING id'
+                else:
+                    query += ' RETURNING id'
+            
+            # Convert ? placeholders to %s for PostgreSQL
+            if params and '?' in query:
+                query = query.replace('?', '%s')
+        
         with self.get_cursor() as cursor:
             if params:
                 cursor.execute(query, params)
@@ -113,12 +144,20 @@ class CloudDatabaseManager:
                 cursor.execute(query)
             
             if self.is_postgres:
-                return cursor.fetchone()  # For RETURNING clause
+                result = cursor.fetchone()
+                return result['id'] if result else None
             else:
                 return cursor.lastrowid
     
     def execute_update(self, query: str, params: tuple = None) -> int:
         """Execute UPDATE query and return affected rows"""
+        # Convert SQLite query to PostgreSQL if needed
+        if self.is_postgres:
+            query = self.convert_sqlite_to_postgres_query(query)
+            # Convert ? placeholders to %s for PostgreSQL
+            if params and '?' in query:
+                query = query.replace('?', '%s')
+        
         with self.get_cursor() as cursor:
             if params:
                 cursor.execute(query, params)
@@ -126,70 +165,35 @@ class CloudDatabaseManager:
                 cursor.execute(query)
             return cursor.rowcount
     
-    def get_compatible_sql(self, sqlite_sql: str, postgres_sql: str = None) -> str:
-        """Get database-specific SQL"""
-        if self.is_postgres and postgres_sql:
-            return postgres_sql
-        return sqlite_sql
-    
-    def format_timestamp(self, timestamp_value: str = "CURRENT_TIMESTAMP") -> str:
-        """Get database-specific timestamp format"""
-        if self.is_postgres:
-            return f"NOW()" if timestamp_value == "CURRENT_TIMESTAMP" else timestamp_value
-        return timestamp_value
-    
-    def get_like_operator(self, case_sensitive: bool = False) -> str:
-        """Get database-specific LIKE operator"""
-        if self.is_postgres and not case_sensitive:
-            return "ILIKE"
-        return "LIKE"
-    
-    def json_encode(self, data: Any) -> str:
-        """Encode data as JSON string for storage"""
-        return json.dumps(data) if data else None
-    
-    def json_decode(self, json_str: str) -> Any:
-        """Decode JSON string from storage"""
-        try:
-            return json.loads(json_str) if json_str else None
-        except (json.JSONDecodeError, TypeError):
-            return None
-    
-    def create_table_if_not_exists(self, table_name: str, columns: dict, indexes: list = None):
-        """Create table with database-specific syntax"""
+    def convert_sqlite_to_postgres_query(self, sqlite_query: str) -> str:
+        """Convert SQLite query to PostgreSQL compatible query"""
+        if not self.is_postgres:
+            return sqlite_query
         
-        # Convert column definitions
-        column_defs = []
-        for col_name, col_def in columns.items():
-            if self.is_postgres:
-                # Convert SQLite types to PostgreSQL
-                col_def = col_def.replace('INTEGER PRIMARY KEY', 'SERIAL PRIMARY KEY')
-                col_def = col_def.replace('TEXT', 'VARCHAR(500)')
-                col_def = col_def.replace('REAL', 'DECIMAL')
-                col_def = col_def.replace('BOOLEAN DEFAULT 1', 'BOOLEAN DEFAULT TRUE')
-                col_def = col_def.replace('BOOLEAN DEFAULT 0', 'BOOLEAN DEFAULT FALSE')
-                col_def = col_def.replace('CURRENT_TIMESTAMP', 'NOW()')
-            
-            column_defs.append(f"{col_name} {col_def}")
+        postgres_query = sqlite_query
         
-        # Create table
-        create_sql = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(column_defs)})"
+        # Common conversions
+        postgres_query = postgres_query.replace('AUTOINCREMENT', 'SERIAL')
+        postgres_query = postgres_query.replace('INTEGER PRIMARY KEY', 'SERIAL PRIMARY KEY')
+        postgres_query = postgres_query.replace('CURRENT_TIMESTAMP', 'NOW()')
+        postgres_query = postgres_query.replace('datetime(', 'TO_TIMESTAMP(')
+        postgres_query = postgres_query.replace("strftime('%Y-%m-%d', ", 'DATE(')
         
-        with self.get_cursor() as cursor:
-            cursor.execute(create_sql)
-            
-            # Create indexes
-            if indexes:
-                for index_sql in indexes:
-                    try:
-                        cursor.execute(index_sql)
-                    except Exception as e:
-                        print(f"⚠️ Index creation warning for {table_name}: {e}")
+        # String concatenation (|| works in both SQLite and PostgreSQL)
+        # No change needed for ||
+        
+        # LIMIT/OFFSET syntax is the same in both
+        # No change needed
+        
+        # Boolean values
+        postgres_query = postgres_query.replace('1', 'TRUE').replace('0', 'FALSE') if 'BOOLEAN' in postgres_query else postgres_query
+        
+        return postgres_query
     
     def health_check(self) -> dict:
         """Check database connection health"""
         try:
-            test_query = "SELECT 1" + (" as test" if self.is_postgres else "")
+            test_query = "SELECT 1 as test"
             result = self.execute_query(test_query)
             
             return {
@@ -205,14 +209,22 @@ class CloudDatabaseManager:
                 'error': str(e)
             }
 
-# Initialize global database manager
-cloud_db = CloudDatabaseManager()
+# Global instance
+db_manager = PostgreSQLDatabaseManager()
 
-# Convenience functions for backward compatibility
+# Convenience functions for easy migration
 def get_db_connection():
-    """Get database connection (legacy support)"""
-    return cloud_db.get_connection()
+    """Get database connection - replaces sqlite3.connect('ella.db')"""
+    return db_manager.get_connection()
 
-def get_db_cursor():
-    """Get database cursor (legacy support)"""
-    return cloud_db.get_cursor() 
+def execute_query(query: str, params: tuple = None) -> list:
+    """Execute SELECT query - direct replacement for cursor.fetchall()"""
+    return db_manager.execute_query(query, params)
+
+def execute_insert(query: str, params: tuple = None) -> Optional[Any]:
+    """Execute INSERT query - direct replacement"""
+    return db_manager.execute_insert(query, params)
+
+def execute_update(query: str, params: tuple = None) -> int:
+    """Execute UPDATE query - direct replacement"""
+    return db_manager.execute_update(query, params) 

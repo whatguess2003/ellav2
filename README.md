@@ -1,106 +1,99 @@
-# 🗄️ ELLA Hotel Database Setup Service
+# 🐘 ELLA PostgreSQL Database Setup
 
-> **🎯 Railway Service: Database initialization and setup**
+> **Complete PostgreSQL database setup for ELLA Hotel System**
 
-## 📋 **Purpose**
+## 🎯 **What This Provides**
 
-This Railway service initializes the PostgreSQL database for the ELLA Hotel Assistant system. It runs once to set up the complete database schema and sample data, then completes.
+PostgreSQL database setup with:
+- ✅ **Complete hotel schema** (8 tables with relationships)
+- ✅ **Sample hotel data** (3 hotels with room types)
+- ✅ **30 days availability** data with weekend pricing
+- ✅ **Sample guests and bookings**
 
-## 🏗️ **Railway Project Structure**
+## 🚀 **Setup Options**
 
-This service is part of a dedicated Railway project with:
-- **PostgreSQL Service** - The actual database
-- **Setup Service** (this repo) - Initializes the database once
+### **Option A: Google Cloud SQL PostgreSQL (Recommended)**
+1. Create PostgreSQL instance in Google Cloud SQL
+2. Run SQL scripts in order:
+   - `database_schema_postgresql.sql`
+   - `sample_data_postgresql.sql`
+   - `test_database_postgresql.sql`
+3. Get connection URL: `postgresql://user:password@host:port/database`
 
-## 🚀 **How It Works**
+### **Option B: Railway PostgreSQL**
+1. Add PostgreSQL service in Railway
+2. Use Railway console to run SQL scripts
+3. Railway automatically provides `DATABASE_URL`
 
-1. **Deploy to Railway** - This service runs automatically
-2. **Database Setup** - Connects to PostgreSQL service and creates schema
-3. **Sample Data** - Adds hotels, rooms, and availability data
-4. **Completion** - Service completes after successful setup
+### **Option C: Local Development**
+- Uses SQLite automatically (`ella.db`)
+- No setup needed for development
 
-## 🗄️ **What Gets Created**
+## 📊 **What Gets Created**
 
-After this service runs, your PostgreSQL database will have:
+### **Hotels:**
+- **Grand Hyatt Kuala Lumpur** (5⭐) - RM 420-450/night
+- **Sam Hotel KL** (3⭐) - RM 120-150/night  
+- **Marina Court Resort** (4⭐) - RM 220-280/night
 
-### **Tables Created:**
-- `hotels` - Hotel information and details
+### **Database Tables:**
+- `hotels` - Hotel information with PostgreSQL arrays for amenities
 - `room_types` - Room categories and pricing
-- `availability` - Date-specific inventory
-- `bookings` - Reservation records
+- `availability` - Date-specific inventory (30 days with weekend pricing)
 - `guests` - Customer information
-- `check_ins` - Check-in records
-- `payments` - Payment tracking
+- `bookings` - Reservation records with self-describing references
+- `check_ins` - Check-in tracking
+- `payments` - Payment records
 - `reviews` - Guest feedback
 
-### **Sample Data:**
-- **Grand Hyatt Kuala Lumpur** (5⭐) - RM 450/night
-- **Sam Hotel KL** (3⭐) - RM 120/night  
-- **Marina Court Resort** (4⭐) - RM 280/night
-- **30 days** of availability data
-- **Multiple room types** per hotel
+## 🔄 **For Your Main ELLA App**
 
-## 🔧 **Railway Configuration**
+The main ELLA application automatically detects the database:
+- **No `DATABASE_URL`** → Uses SQLite (development)
+- **`DATABASE_URL=postgresql://...`** → Uses PostgreSQL (production)
 
-### **Environment Variables (Auto-configured):**
-- `DATABASE_URL` - Automatically set by Railway PostgreSQL service
-- `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` - PostgreSQL connection details
-
-### **Service Dependencies:**
-This service requires the PostgreSQL service to be running first.
-
-## 📊 **Verification**
-
-After this service completes, you can verify the setup:
-
-```sql
--- Connect to your PostgreSQL service and run:
-SELECT COUNT(*) FROM hotels;          -- Should return 3
-SELECT COUNT(*) FROM room_types;      -- Should return 6  
-SELECT COUNT(*) FROM availability;    -- Should return 180 (30 days × 6 rooms)
+```python
+# Your code works unchanged:
+from database.postgresql_connection import execute_query
+hotels = execute_query("SELECT * FROM hotels")
 ```
 
-## 🔗 **Related Services**
+## 🛠️ **Files Available**
 
-- **Main Application:** https://github.com/whatguess2003/ellav2
-- **This Setup Service:** https://github.com/whatguess2003/ella-database-setup
+### **SQL Scripts:**
+- `database_schema_postgresql.sql` - Creates all tables
+- `sample_data_postgresql.sql` - Inserts sample data
+- `test_database_postgresql.sql` - Verifies setup
 
-## 🎯 **Workflow**
+### **Python Connection:**
+- `database/postgresql_connection.py` - Universal connection manager
+- `test_postgresql_connection.py` - Test script
 
-1. **Deploy Database Setup** (this service) - Runs once to initialize
-2. **Deploy Main Application** (ellav2) - Connects to initialized database
-3. **ELLA System Ready** - Hotel booking system operational
+### **Documentation:**
+- `POSTGRESQL_SETUP_COMPLETE.md` - Complete setup guide
 
-## ⚠️ **Important Notes**
+## 🎯 **Key Features**
 
-- **One-time service** - Only needs to run once per database
-- **Idempotent** - Safe to run multiple times (checks for existing data)
-- **Automatic connection** - Uses Railway's PostgreSQL service variables
-- **Completes after setup** - Service will finish after successful initialization
+- ✅ **Automatic Detection** - SQLite for dev, PostgreSQL for production
+- ✅ **Query Conversion** - Automatic SQLite → PostgreSQL translation
+- ✅ **Connection Pooling** - Optimized for production
+- ✅ **Native Arrays** - PostgreSQL TEXT[] for amenities
+- ✅ **Weekend Pricing** - Realistic availability patterns
 
-## 🛠️ **Troubleshooting**
+## 🧪 **Testing**
 
-### **Service Fails to Start**
-- Check PostgreSQL service is running
-- Verify DATABASE_URL is set
-- Check service logs for connection errors
-
-### **Database Already Exists**
-- Service will detect existing tables and skip creation
-- Safe to redeploy if needed
-
-### **Connection Issues**
 ```bash
-# Service will automatically retry connections
-# Check Railway PostgreSQL service status
+python test_postgresql_connection.py
 ```
 
-## 📞 **Support**
-
-For issues with:
-- **Database setup** - Check this service's logs in Railway
-- **Main application** - Check ellav2 repository
+Expected output:
+```
+🏨 Hotels: 4 (Grand Hyatt Kuala Lumpur 5⭐)
+🛏️ Room types: 3
+📋 Bookings: 4
+✅ Connection manager: Ready!
+```
 
 ---
 
-**🎯 This service initializes your ELLA Hotel database once, then completes successfully.**
+**🐘 PostgreSQL-ready ELLA Hotel System with automatic SQLite fallback for development!**

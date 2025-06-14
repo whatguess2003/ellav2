@@ -986,22 +986,24 @@ async def get_room_photos_api(hotel_name: str, room_type: str):
 
 @app.get("/api/stats")
 async def get_ella_stats():
-    """Get system statistics"""
+    """Get basic stats about ELLA system"""
     try:
-        import sqlite3
-        with sqlite3.connect("ella.db") as conn:
-            cursor = conn.cursor()
-            
-            # Count of various entities
-            stats = {
-                "hotels": cursor.execute("SELECT COUNT(*) FROM hotels").fetchone()[0],
-                "bookings": cursor.execute("SELECT COUNT(*) FROM bookings").fetchone()[0],
-                "room_types": cursor.execute("SELECT COUNT(*) FROM room_types").fetchone()[0],
-                "service": "ella_guest_assistant",
-                "access_level": "READ_ONLY"
-            }
-            
-            return stats
+        from database.mysql_connection import execute_query
+        
+        # Count of various entities
+        hotels_result = execute_query("SELECT COUNT(*) as count FROM hotels")
+        bookings_result = execute_query("SELECT COUNT(*) as count FROM bookings")
+        room_types_result = execute_query("SELECT COUNT(*) as count FROM room_types")
+        
+        stats = {
+            "hotels": hotels_result[0]['count'] if hotels_result else 0,
+            "bookings": bookings_result[0]['count'] if bookings_result else 0,
+            "room_types": room_types_result[0]['count'] if room_types_result else 0,
+            "service": "ella_guest_assistant",
+            "access_level": "READ_ONLY"
+        }
+        
+        return stats
             
     except Exception as e:
         print(f"ELLA Stats error: {e}")
