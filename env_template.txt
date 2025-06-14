@@ -1,0 +1,29 @@
+# ELLA Hotel System Environment Variables Template
+# Copy this to .env and fill in your values
+
+# Database Configuration
+# For local PostgreSQL (replace 'your_password' with your postgres password)
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/ella_hotel
+
+# For Railway PostgreSQL (uncomment and replace with your Railway database URL)
+# DATABASE_URL=postgresql://postgres:password@host:port/database
+
+# Redis Configuration
+# For local Redis
+REDIS_URL=redis://localhost:6379
+
+# For Railway Redis (uncomment and replace with your Railway Redis URL)
+# REDIS_URL=redis://default:password@host:port
+
+# API Keys
+OPENAI_API_KEY=your_openai_api_key_here
+ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+
+# WhatsApp Business API
+WHATSAPP_ACCESS_TOKEN=your_whatsapp_access_token
+WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id
+WHATSAPP_VERIFY_TOKEN=ella_verify_token_2024
+
+# Application Settings
+PORT=8000
+ENVIRONMENT=development 

@@ -1,1 +1,1 @@
-web: gunicorn --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT app:app 
+﻿web: python postgresql_setup.py

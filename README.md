@@ -1,194 +1,106 @@
-# 🏨 Ella Voice Assistant - Hotel Booking System
+# 🗄️ ELLA Hotel Database Setup Service
 
-## 🎯 Project Overview
+> **🎯 Railway Service: Database initialization and setup**
 
-**Ella** is an advanced AI-powered voice assistant specifically designed for hotel booking and customer service. Built with cutting-edge LLM technology, it provides seamless hotel search, booking, and check-in verification through voice calls and WhatsApp integration.
+## 📋 **Purpose**
 
-## ✨ Key Features
+This Railway service initializes the PostgreSQL database for the ELLA Hotel Assistant system. It runs once to set up the complete database schema and sample data, then completes.
 
-### 🗣️ **Multi-Channel Voice Assistant**
-- **Phone Calls**: Natural voice conversations in Malay/English
-- **WhatsApp Integration**: Text and voice message support
-- **Unified Guest Identity**: Phone number = Guest ID across all channels
+## 🏗️ **Railway Project Structure**
 
-### 🏨 **Complete Hotel Management System**
-- **Real-time Hotel Search**: City-based search with availability checking
-- **Dynamic Pricing**: Date-specific room inventory and pricing
-- **Instant Booking**: Voice-activated room reservations
-- **Check-in Verification**: Secure phone-based check-in authentication
+This service is part of a dedicated Railway project with:
+- **PostgreSQL Service** - The actual database
+- **Setup Service** (this repo) - Initializes the database once
 
-### 🆔 **Self-Describing Booking References**
-Revolutionary booking reference system that contains all booking information:
-```
-+60123456789;marinacourt;checkin21052025;checkout22052025+deluxesea+withbreakfast+booking1
-```
-- **📱 Phone**: +60123456789 (Guest ID)
-- **🏨 Hotel**: marinacourt (Marina Court)
-- **📅 Dates**: Check-in 21/05/2025, Check-out 22/05/2025
-- **🛏️ Room**: deluxesea (Deluxe Sea View)
-- **✨ Services**: withbreakfast
-- **#️⃣ Sequence**: booking1
+## 🚀 **How It Works**
 
-### 🗄️ **Human-Readable Database Schema**
-- **Geographic Hierarchy**: Malaysia → States → Cities → Hotels
-- **LLM-Friendly IDs**: `marina-court-kota-kinabalu_deluxe-sea`
-- **Raw Name Primary Keys**: Uses actual names instead of codes
-- **Self-Documenting**: No lookup required to understand data
+1. **Deploy to Railway** - This service runs automatically
+2. **Database Setup** - Connects to PostgreSQL service and creates schema
+3. **Sample Data** - Adds hotels, rooms, and availability data
+4. **Completion** - Service completes after successful setup
 
-## 🏗️ Architecture
+## 🗄️ **What Gets Created**
 
-### Core Components
-```
-📞 Voice Interface (ElevenLabs + OpenAI GPT-4o-mini-transcribe)
-├── 🤖 LangGraph Agent (OpenAI GPT-4)
-├── 🗄️ SQLite Hotel Database (Human-readable schema)
-├── 🔄 Redis Session Management
-└── 🌐 FastAPI REST API
-```
+After this service runs, your PostgreSQL database will have:
 
-### Database Structure
-```
-Malaysia (Country)
-├── Kuala Lumpur (State)
-│   └── Kuala Lumpur (City)
-│       └── grand-hyatt-kuala-lumpur (Hotel)
-│           ├── grand-hyatt_grand-king (Room Type)
-│           └── grand-hyatt_twin-city (Room Type)
-└── Sabah (State)
-    └── Kota Kinabalu (City)
-        └── marina-court-kota-kinabalu (Hotel)
-            ├── marina-court_deluxe-sea (Room Type)
-            └── marina-court_superior-garden (Room Type)
-```
+### **Tables Created:**
+- `hotels` - Hotel information and details
+- `room_types` - Room categories and pricing
+- `availability` - Date-specific inventory
+- `bookings` - Reservation records
+- `guests` - Customer information
+- `check_ins` - Check-in records
+- `payments` - Payment tracking
+- `reviews` - Guest feedback
 
-## 🚀 Current Status
+### **Sample Data:**
+- **Grand Hyatt Kuala Lumpur** (5⭐) - RM 450/night
+- **Sam Hotel KL** (3⭐) - RM 120/night  
+- **Marina Court Resort** (4⭐) - RM 280/night
+- **30 days** of availability data
+- **Multiple room types** per hotel
 
-### ✅ **Completed Features**
-- **🏗️ Database Schema**: Complete 8-table hotel database
-- **🏨 Hotel Onboarding**: Add hotels with duplicate prevention
-- **📅 Inventory Management**: Date-specific availability and pricing
-- **📝 Booking System**: Self-describing booking references
-- **🔍 Hotel Search**: Natural language search with filters
-- **🗣️ Voice Interface**: Working voice commands and responses
-- **🤖 AI Agent**: LangGraph-powered conversational AI
-- **📱 Guest ID System**: Phone number as unified customer identity
+## 🔧 **Railway Configuration**
 
-### 🧪 **Test Data**
-- **4 Hotels**: Grand Hyatt KL, Marina Court KK, Shangri-La Penang, Budget Inn JB
-- **6 Room Types**: Various categories (King, Twin, Sea View, City View)
-- **30 Days Inventory**: Fully populated availability and pricing
-- **3 Sample Bookings**: Working booking references and check-in flow
+### **Environment Variables (Auto-configured):**
+- `DATABASE_URL` - Automatically set by Railway PostgreSQL service
+- `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` - PostgreSQL connection details
 
-## 🎯 **Unique Innovations**
+### **Service Dependencies:**
+This service requires the PostgreSQL service to be running first.
 
-### 1. **Self-Describing Booking References**
-Unlike traditional cryptic booking codes, our references contain all booking information:
-- **Traditional**: `ABC123DEF` (meaningless without database lookup)
-- **Ella**: `+60123456789;marinacourt;checkin21052025;checkout22052025+deluxesea+withbreakfast+booking1`
+## 📊 **Verification**
 
-### 2. **Unified Guest Identity**
-- **Same phone number** for booking, check-in, and customer service
-- **Cross-channel continuity** between voice calls and WhatsApp
-- **Instant recognition** by AI assistant
+After this service completes, you can verify the setup:
 
-### 3. **Human-Readable Database**
-- **Property IDs**: `marina-court-kota-kinabalu` (not `PROP001`)
-- **Room Type IDs**: `marina-court_deluxe-sea` (not `RT001_DEL`)
-- **LLM-optimized** for AI understanding and processing
-
-## 📁 Project Structure
-
-```
-ellav2/
-├── 🗄️ database/
-│   ├── schema.py              # Database schema creation
-│   ├── onboarding.py          # Hotel onboarding system
-│   └── manage_availability.py # Inventory & booking management
-├── 🛠️ tools/
-│   └── hotel_search_tool.py   # LangGraph hotel search tools
-├── 🧪 test_*.py              # Test scripts and validation
-├── 📝 main_with_sql_integration.py # Main API server
-├── 🗃️ ella.db               # SQLite hotel database
-└── 📋 README.md              # This file
+```sql
+-- Connect to your PostgreSQL service and run:
+SELECT COUNT(*) FROM hotels;          -- Should return 3
+SELECT COUNT(*) FROM room_types;      -- Should return 6  
+SELECT COUNT(*) FROM availability;    -- Should return 180 (30 days × 6 rooms)
 ```
 
-## 🔧 Installation & Setup
+## 🔗 **Related Services**
 
-### Prerequisites
-- Python 3.11+
-- OpenAI API key
-- ElevenLabs API key (for voice)
-- Redis server
+- **Main Application:** https://github.com/whatguess2003/ellav2
+- **This Setup Service:** https://github.com/whatguess2003/ella-database-setup
 
-### Quick Start
+## 🎯 **Workflow**
+
+1. **Deploy Database Setup** (this service) - Runs once to initialize
+2. **Deploy Main Application** (ellav2) - Connects to initialized database
+3. **ELLA System Ready** - Hotel booking system operational
+
+## ⚠️ **Important Notes**
+
+- **One-time service** - Only needs to run once per database
+- **Idempotent** - Safe to run multiple times (checks for existing data)
+- **Automatic connection** - Uses Railway's PostgreSQL service variables
+- **Completes after setup** - Service will finish after successful initialization
+
+## 🛠️ **Troubleshooting**
+
+### **Service Fails to Start**
+- Check PostgreSQL service is running
+- Verify DATABASE_URL is set
+- Check service logs for connection errors
+
+### **Database Already Exists**
+- Service will detect existing tables and skip creation
+- Safe to redeploy if needed
+
+### **Connection Issues**
 ```bash
-# 1. Clone and setup
-git clone <repository>
-cd ellav2
-pip install -r requirements.txt
-
-# 2. Create database
-python database/schema.py
-
-# 3. Add test hotels
-python test_hotel_setup.py
-
-# 4. Start the API server
-python main_with_sql_integration.py
+# Service will automatically retry connections
+# Check Railway PostgreSQL service status
 ```
 
-## 🎬 Demo Usage
+## 📞 **Support**
 
-### Voice Commands (Natural Language)
-```
-🗣️ "Hello, hotel dekat KL ade tak?"
-🤖 "Ada satu hotel yang sesuai di Kuala Lumpur..."
-
-🗣️ "Nak tahu lebih lanjut"
-🤖 "Grand Hyatt Kuala Lumpur, 5 bintang..."
-
-🗣️ "Book Grand King Room untuk esok"
-🤖 "Booking confirmed! Reference: +60123456789;grandhyatt;..."
-```
-
-### Check-in Flow
-```
-🚗 Guest arrives at hotel
-🏨 Reception: "Please call Ella to check-in"
-📞 Guest calls from: +60123456789
-🤖 Ella: "Hello! Ready to check in to Marina Court, Deluxe Sea View?"
-✅ Check-in approved instantly
-```
-
-## 🔮 Future Development
-
-### Phase 1: WhatsApp Integration
-- Direct WhatsApp Business API integration
-- Multi-media message support
-- Automated customer service
-
-### Phase 2: Advanced Features
-- Multi-language support (Mandarin, Tamil)
-- Payment gateway integration
-- Loyalty program management
-
-### Phase 3: Scale & Analytics
-- Multi-hotel chain support
-- Advanced analytics and reporting
-- Predictive pricing algorithms
-
-## 🏆 Technical Achievements
-
-✅ **Revolutionary booking reference system** - self-describing and human-readable  
-✅ **Unified guest identity** - one phone number across all channels  
-✅ **Human-readable database schema** - LLM-optimized for AI processing  
-✅ **Natural language processing** - conversational hotel booking in Malay/English  
-✅ **Real-time inventory management** - dynamic pricing and availability  
-✅ **Secure check-in verification** - phone-based authentication system  
-
-## 📞 Contact & Support
-
-Built with ❤️ for the future of hospitality technology.
+For issues with:
+- **Database setup** - Check this service's logs in Railway
+- **Main application** - Check ellav2 repository
 
 ---
-**🎯 Status**: Production-ready hotel booking system with voice AI integration
+
+**🎯 This service initializes your ELLA Hotel database once, then completes successfully.**

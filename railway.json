@@ -1,35 +1,8 @@
-{
-  "$schema": "https://railway.app/railway.schema.json",
+﻿{
   "build": {
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python railway_deploy.py",
-    "healthcheckPath": "/health",
-    "healthcheckTimeout": 300,
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
-  },
-  "environments": {
-    "production": {
-      "variables": {
-        "REDIS_URL": "${{Redis.REDIS_URL}}",
-        "REDISHOST": "${{Redis.REDISHOST}}",
-        "REDISPORT": "${{Redis.REDISPORT}}",
-        "REDISUSER": "${{Redis.REDISUSER}}",
-        "REDISPASSWORD": "${{Redis.REDISPASSWORD}}",
-        "DATABASE_URL": "${{Postgres.DATABASE_URL}}",
-        "PGHOST": "${{Postgres.PGHOST}}",
-        "PGPORT": "${{Postgres.PGPORT}}",
-        "PGDATABASE": "${{Postgres.PGDATABASE}}",
-        "PGUSER": "${{Postgres.PGUSER}}",
-        "PGPASSWORD": "${{Postgres.PGPASSWORD}}",
-        "WHATSAPP_ACCESS_TOKEN": "",
-        "WHATSAPP_PHONE_NUMBER_ID": "",
-        "WHATSAPP_VERIFY_TOKEN": "ella_verify_token_2024",
-        "PYTHON_VERSION": "3.11",
-        "ENVIRONMENT": "production"
-      }
-    }
+    "startCommand": "python postgresql_setup.py"
   }
-} 
+}
